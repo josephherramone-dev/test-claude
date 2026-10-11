@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   CARLA design tokens
+   Ink / charcoal = coach livery · Carla pink = plate & accent
+   Sand / dusk = Moroccan landscape of the brand photograph
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  --color-ink-950: #08080b;
+  --color-ink-900: #0d0d12;
+  --color-ink-850: #121219;
+  --color-ink-800: #191922;
+  --color-ink-700: #24242f;
+  --color-ink-600: #383845;
+  --color-ink-400: #8b8b99;
+  --color-ink-300: #b4b4bf;
+  --color-ink-200: #d6d6dd;
+
+  --color-carla-300: #ec6fa2; /* accent text on dark — 6.9:1 */
+  --color-carla-400: #e2558f;
+  --color-carla-500: #d63a7a; /* brand pink — large/decorative */
+  --color-carla-600: #c42f6c; /* buttons with white text — 5.3:1 */
+  --color-carla-700: #a8295e; /* hover / text on light — 6.1:1 */
+  --color-carla-50: #fcf0f5;
+
+  --color-sand-300: #e4c9ad;
+  --color-sand-400: #c9a27e;
+  --color-sand-600: #8f6648;
+  --color-dusk-200: #f6d9cc;
+
+  --color-paper: #f7f4ef;
+  --color-paper-2: #efeae2;
+  --color-line: #e2dcd2;
+  --color-muted: #5b5b66; /* body text on paper — 6.1:1 */
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Jost Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Allura", "Brush Script MT", cursive;
+
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-ken-burns: ken-burns 22s var(--ease-cinematic) both;
+  --animate-scroll-cue: scroll-cue 2.2s ease-in-out infinite;
+
+  @keyframes ken-burns {
+    from { transform: scale(1.12); }
+    to { transform: scale(1.02); }
+  }
+  @keyframes scroll-cue {
+    0% { transform: translateY(-100%); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateY(220%); opacity: 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 6rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+  }
+  ::selection {
+    background: var(--color-carla-500);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-carla-400);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  .on-light :focus-visible,
+  .on-light:focus-visible {
+    outline-color: var(--color-carla-700);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) { .container-page { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .container-page { padding-inline: 3rem; } }
+
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+  .display-xl {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    font-size: clamp(2.6rem, 6.2vw, 5.6rem);
+  }
+  .display-lg {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.015em;
+    line-height: 1.06;
+    font-size: clamp(2.1rem, 4.4vw, 3.9rem);
+  }
+  .display-md {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.12;
+    font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: 0.34em;
+  }
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+  .hairline-dark { border-color: rgb(255 255 255 / 0.1); }
+  .glass-dark {
+    background: rgb(13 13 18 / 0.55);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.1);
+  }
+  .road-line {
+    background-image: linear-gradient(90deg, var(--color-carla-500) 0 2.5rem, transparent 2.5rem 4rem);
+    background-size: 4rem 2px;
+    background-repeat: repeat-x;
+    height: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
