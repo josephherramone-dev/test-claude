@@ -1,0 +1,43 @@
+# Paste this in Coolify: + New Resource -> Docker Compose Empty
+# Replace PUT_YOUR_PEXELS_KEY_HERE and PUT_YOUR_GEMINI_KEY_HERE (2 places each)
+services:
+  mpt-api:
+    build:
+      context: https://github.com/harry0703/MoneyPrinterTurbo.git
+    command: ["python3", "main.py"]
+    restart: unless-stopped
+    volumes:
+      - mpt-storage:/MoneyPrinterTurbo/storage
+      - type: bind
+        source: ./config.toml
+        target: /MoneyPrinterTurbo/config.toml
+        content: |
+          [app]
+          video_source = "pexels"
+          pexels_api_keys = ["PUT_YOUR_PEXELS_KEY_HERE"]
+          llm_provider = "gemini"
+          gemini_api_key = "PUT_YOUR_GEMINI_KEY_HERE"
+          gemini_model_name = "gemini-2.5-flash"
+          max_concurrent_tasks = 1
+
+  mpt-webui:
+    build:
+      context: https://github.com/harry0703/MoneyPrinterTurbo.git
+    command: ["streamlit", "run", "./webui/Main.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=False"]
+    restart: unless-stopped
+    volumes:
+      - mpt-storage:/MoneyPrinterTurbo/storage
+      - type: bind
+        source: ./config.toml
+        target: /MoneyPrinterTurbo/config.toml
+        content: |
+          [app]
+          video_source = "pexels"
+          pexels_api_keys = ["PUT_YOUR_PEXELS_KEY_HERE"]
+          llm_provider = "gemini"
+          gemini_api_key = "PUT_YOUR_GEMINI_KEY_HERE"
+          gemini_model_name = "gemini-2.5-flash"
+          max_concurrent_tasks = 1
+
+volumes:
+  mpt-storage:

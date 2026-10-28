@@ -1,0 +1,123 @@
+{
+  "name": "A - Research: trends to ideas (daily)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "cronExpression", "expression": "0 6 * * *" } ] }
+      },
+      "name": "Every day 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "id": "r1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "c1", "name": "niche", "value": "surprising science and history fun facts", "type": "string" },
+            { "id": "c2", "name": "language", "value": "English", "type": "string" },
+            { "id": "c3", "name": "ideasPerDay", "value": 5, "type": "number" },
+            { "id": "c4", "name": "geminiKey", "value": "PUT_YOUR_GEMINI_KEY_HERE", "type": "string" },
+            { "id": "c5", "name": "geminiModel", "value": "gemini-2.5-flash", "type": "string" },
+            { "id": "c6", "name": "nocodbUrl", "value": "https://nocodb.yourdomain.com", "type": "string" },
+            { "id": "c7", "name": "nocodbToken", "value": "PUT_YOUR_NOCODB_TOKEN_HERE", "type": "string" },
+            { "id": "c8", "name": "ideasTableId", "value": "PUT_IDEAS_TABLE_ID_HERE", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0],
+      "id": "r2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Edit this list to change where ideas come from (any RSS feed works)\nconst feeds = [\n  'https://trends.google.com/trending/rss?geo=US',\n  'https://www.sciencedaily.com/rss/top/science.xml',\n  'https://www.reddit.com/r/todayilearned/top/.rss?t=day',\n  'https://www.reddit.com/r/interestingasfuck/top/.rss?t=day'\n];\nreturn feeds.map(url => ({ json: { url } }));"
+      },
+      "name": "Feed list",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "r3"
+    },
+    {
+      "parameters": { "url": "={{ $json.url }}", "options": {} },
+      "name": "Read feeds",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [660, 0],
+      "id": "r4",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst headlines = $input.all()\n  .map(i => i.json.title)\n  .filter(t => typeof t === 'string' && t.length > 0)\n  .slice(0, 80);\nif (headlines.length === 0) throw new Error('No headlines: every feed failed. Check the Read feeds node.');\nconst prompt = `You are the research brain of a short-video channel about: ${cfg.niche}.\nToday's trending headlines:\n- ${headlines.join('\\n- ')}\n\nPropose exactly ${cfg.ideasPerDay} ideas for 30-60 second vertical videos in ${cfg.language}.\nPick ideas that fit the niche, are evergreen or trending, and can be shown with visuals.\nReturn ONLY a JSON array. Each item: {\"title\": string, \"hook\": string (first sentence, max 15 words, creates curiosity), \"angle\": string (one sentence), \"source_headline\": string, \"score\": number 0-100 (viral potential), \"lane\": \"stock\" if real-world footage can show it, or \"ai\" if it needs imaginary/impossible visuals}.`;\nreturn [{ json: { prompt } }];"
+      },
+      "name": "Build prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "id": "r5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/{{ $('Config').first().json.geminiModel }}:generateContent",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "x-goog-api-key", "value": "={{ $('Config').first().json.geminiKey }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contents: [{ parts: [{ text: $json.prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.9 } }) }}",
+        "options": {}
+      },
+      "name": "Gemini: pick ideas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 0],
+      "id": "r6",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.candidates?.[0]?.content?.parts?.[0]?.text || '[]';\nlet ideas = JSON.parse(text);\nif (!Array.isArray(ideas)) ideas = ideas.ideas || [];\nconst records = ideas.map(i => ({\n  Title: String(i.title || '').slice(0, 250),\n  Hook: i.hook || '',\n  Angle: i.angle || '',\n  Source: i.source_headline || '',\n  Score: Number(i.score) || 0,\n  Lane: i.lane === 'ai' ? 'ai' : 'stock',\n  Status: 'new'\n})).filter(r => r.Title);\nif (records.length === 0) throw new Error('Gemini returned no ideas: ' + text.slice(0, 300));\nreturn [{ json: { records } }];"
+      },
+      "name": "Clean ideas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0],
+      "id": "r7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.nocodbUrl }}/api/v2/tables/{{ $('Config').first().json.ideasTableId }}/records",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "xc-token", "value": "={{ $('Config').first().json.nocodbToken }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.records) }}",
+        "options": {}
+      },
+      "name": "Save to NocoDB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 0],
+      "id": "r8"
+    }
+  ],
+  "connections": {
+    "Every day 06:00": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
+    "Config": { "main": [[{ "node": "Feed list", "type": "main", "index": 0 }]] },
+    "Feed list": { "main": [[{ "node": "Read feeds", "type": "main", "index": 0 }]] },
+    "Read feeds": { "main": [[{ "node": "Build prompt", "type": "main", "index": 0 }]] },
+    "Build prompt": { "main": [[{ "node": "Gemini: pick ideas", "type": "main", "index": 0 }]] },
+    "Gemini: pick ideas": { "main": [[{ "node": "Clean ideas", "type": "main", "index": 0 }]] },
+    "Clean ideas": { "main": [[{ "node": "Save to NocoDB", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
