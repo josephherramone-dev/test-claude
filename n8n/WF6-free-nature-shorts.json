@@ -1,0 +1,886 @@
+{
+  "name": "WF6 FREE - Nature & Destination Shorts (Pexels + FFmpeg)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# 🛠️ SETUP — FREE Nature & Destination Shorts\n*No KIE.ai video/image credits. Real 4K stock footage + FFmpeg editing, all free.*\n\n### Free stack\n- **Footage:** Pexels Video API (free) + Pixabay API (free fallback). Real cinematic 1080p–4K clips, royalty-free, OK for monetized channels.\n- **Editing:** FFmpeg inside n8n (Execute Command): crop to 9:16, colour grade, sharpen, animated titles, cross-dissolves, music with -14 LUFS loudness, H.264 export.\n- **Music:** your own royalty-free tracks (YouTube Audio Library / Pixabay Music) in a folder.\n- **Hosting:** Google Drive (free) gives Blotato a public URL.\n- **Writing:** Claude via KIE (only ~1 cheap text call per video).\n\n### Steps\n1. **Self-hosted n8n with FFmpeg** — use the Dockerfile + docker-compose in this repo (n8n/README.md). It installs FFmpeg + fonts and enables the Execute Command node (`NODES_EXCLUDE=[]`). n8n Cloud cannot run FFmpeg.\n2. **Pexels** key (pexels.com/api) → Header Auth credential **Pexels**: Name `Authorization`, Value `YOUR_KEY` (no \"Bearer\"). Select it on *Search Pexels* + *Search Pexels (alt)*.\n3. **Pixabay** key (pixabay.com/api/docs) → Query Auth credential **Pixabay**: Name `key`, Value `YOUR_KEY`. Select it on *Search Pixabay*.\n4. **Music**: drop .mp3 files into `/home/node/.n8n-files/music/calm|uplifting|epic|emotional/` (the mounted ./music folder). No music → silent track.\n5. **Google Drive** OAuth credential on *Upload to Drive* + *Make Public*.\n6. Sheet columns: `Topic | Destination 1 | Destination 2 | Destination 3 | Destination 4 | Status | Video URL`.\n7. Blotato: Header Auth `blotato-api-key` on the 4 Blotato nodes + your account IDs.\n\nTweak look/length in **Build Render Script** (top of the code).",
+        "height": 1124,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10112,
+        2032
+      ],
+      "id": "71708adc-59fd-4731-9454-4d0ed69f22c5",
+      "name": "Setup Guide"
+    },
+    {
+      "parameters": {
+        "content": "# 1) Story, search queries & on-screen text — Claude",
+        "height": 260,
+        "width": 1460,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10864,
+        2032
+      ],
+      "id": "41313e3c-b7a1-4696-ab77-c8dcd3bed5c8",
+      "name": "S1"
+    },
+    {
+      "parameters": {
+        "content": "# 2) Free footage — Pexels + Pixabay",
+        "height": 260,
+        "width": 1460,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10864,
+        2320
+      ],
+      "id": "32bcfd88-6921-48ed-89bb-7c16a5723b97",
+      "name": "S2"
+    },
+    {
+      "parameters": {
+        "content": "# 3) Edit & render — FFmpeg (free, local)",
+        "height": 260,
+        "width": 1460,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10864,
+        2608
+      ],
+      "id": "3186eba2-11de-4361-b38f-1ad8f34d0946",
+      "name": "S3"
+    },
+    {
+      "parameters": {
+        "content": "# 4) Host — Google Drive (free) + cleanup",
+        "height": 260,
+        "width": 1460,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        10864,
+        2896
+      ],
+      "id": "708566d7-df18-4941-b206-6845dc8e9fce",
+      "name": "S4"
+    },
+    {
+      "parameters": {
+        "content": "# 5) Publish — Awareness",
+        "height": 1124,
+        "width": 420,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        12352,
+        2032
+      ],
+      "id": "5f33c016-ce3f-4f69-a3d8-4c239549bf5b",
+      "name": "S5"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        10912,
+        2128
+      ],
+      "id": "9ae257c6-0d22-4181-bc65-96d3303c8959",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow",
+          "mode": "list",
+          "cachedResultName": "Get posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Get posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        11072,
+        2128
+      ],
+      "id": "2dc8e996-cc4c-478b-acb6-da97faab4754",
+      "name": "Get Story Rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Take the first row that has not been posted yet. No row → stop quietly.\nconst row = $input.all().map(i => i.json).find(r => !String(r.Status || '').trim());\nif (!row) return [];\nconst destinations = [1, 2, 3, 4]\n  .map(n => String(row[`Destination ${n}`] || '').trim())\n  .filter(Boolean);\nif (destinations.length !== 4) throw new Error(`Row ${row.row_number}: need 4 destinations, found ${destinations.length}`);\nreturn [{ json: { row_number: row.row_number, topic: row.Topic || 'Hidden wonders', destinations } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11232,
+        2128
+      ],
+      "id": "d4ee0c62-9590-4aa7-8bc3-772817f38aab",
+      "name": "Pick Next Row"
+    },
+    {
+      "parameters": {
+        "jsCode": "const SYSTEM = \"You are the creative director and lead copywriter of a short-form nature & travel channel. Your job sits at the AWARENESS stage of the funnel: stop the scroll, spark wonder, and make a stranger feel something in the first second, then leave them wanting to go there.\\n\\nYou write with emotional storytelling, editorial restraint and premium copy. No cliches (\\\"hidden gem\\\", \\\"bucket list\\\", \\\"paradise on earth\\\"), no exclamation-mark hype, no emojis.\\n\\nIMPORTANT: this video is edited from REAL cinematic stock footage (Pexels and Pixabay), not AI generation. Your two jobs are (a) to find the most cinematic footage with smart search queries and (b) to write the words that sit on top of it.\\n\\nYou will receive a TOPIC and exactly 4 DESTINATIONS. Build ONE ~26-second vertical short made of 4 consecutive ~7-second scenes, one per destination, in the given order, that together tell a single emotional arc:\\n- Scene 1 - HOOK: the most arresting, unexpected shot (dramatic aerial, huge waterfall, cliff edge, wildlife). Must work with sound off.\\n- Scene 2 - DISCOVERY: pull the viewer deeper; scale, texture or a surprising detail.\\n- Scene 3 - FEELING: intimate and human; a person walking, swimming, hiking or watching the view.\\n- Scene 4 - AFTERGLOW: the widest, calmest shot; sunset, golden hour or blue hour; a feeling of arrival.\\n\\nFor EACH scene write:\\n1. search_queries: exactly 3 English stock-video search queries, 2-4 words each, ordered from most specific to most generic.\\n   - Query 1 = place name + shot type (e.g. \\\"Moraine Lake aerial\\\").\\n   - Query 2 = the landscape and light WITHOUT the place name (e.g. \\\"turquoise mountain lake sunrise\\\").\\n   - Query 3 = a safe generic fallback that surely exists (e.g. \\\"mountain lake drone\\\").\\n   Stock libraries are tagged with simple concrete nouns: use words like waterfall, fjord, rice terraces, desert dunes, aerial, drone, sunset, fog, waves, forest, woman walking, hiker. Never use abstract words (breathtaking, magical, serene) in queries. Prefer subjects that read well vertically: waterfalls, cliffs, tall trees, people, top-down drone shots.\\n2. overlay: on-screen text for the scene, 2-6 words, poetic but concrete, sentence case, no hashtags, no emojis, no ending period. (Scene 1 shows the hook instead, but still write an overlay.)\\n3. label: the location label \\\"Place, Country\\\", max 32 characters.\\n\\nThen write the packaging:\\n- title: YouTube Shorts title, max 70 characters, curiosity-driven, names the place or the feeling.\\n- hook: the first line viewers read ON SCREEN over scene 1, max 8 words, an emotional or curiosity hook, no ending period.\\n- caption: 2-4 short lines for Instagram/TikTok. Line 1 = the hook. Then a sensory line, then a soft invitation (save it, share it with who you'd go with). No hard sell, no links.\\n- hashtags: 5-8 relevant hashtags, mixing broad (#travel #nature) and specific (place names).\\n- music_mood: exactly one of \\\"calm\\\", \\\"uplifting\\\", \\\"epic\\\", \\\"emotional\\\" - the background music that best fits the arc.\\n\\nReturn ONLY valid JSON, no markdown fences, no commentary, exactly this shape:\\n{\\n  \\\"title\\\": \\\"\\\",\\n  \\\"hook\\\": \\\"\\\",\\n  \\\"caption\\\": \\\"\\\",\\n  \\\"hashtags\\\": [\\\"#...\\\"],\\n  \\\"music_mood\\\": \\\"calm\\\",\\n  \\\"scenes\\\": [\\n    {\\\"destination\\\": \\\"\\\", \\\"role\\\": \\\"hook|discovery|feeling|afterglow\\\", \\\"search_queries\\\": [\\\"\\\", \\\"\\\", \\\"\\\"], \\\"overlay\\\": \\\"\\\", \\\"label\\\": \\\"\\\"}\\n  ]\\n}\\n\\\"scenes\\\" must contain exactly 4 objects, in the order of the destinations given.\";\nconst { topic, destinations } = $input.first().json;\nconst user = `TOPIC: ${topic}\\nDESTINATIONS (in order):\\n${destinations.map((d, i) => `${i + 1}. ${d}`).join('\\n')}`;\nreturn [{ json: {\n  ...$input.first().json,\n  body: {\n    model: 'claude-opus-5-5',\n    max_tokens: 4096,\n    stream: false,\n    messages: [{ role: 'user', content: `${SYSTEM}\\n\\n---\\n\\n${user}` }]\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11392,
+        2128
+      ],
+      "id": "c31bf2ed-31db-40c4-a900-e41f81e8dc8f",
+      "name": "Build Claude Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/claude/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11552,
+        2128
+      ],
+      "id": "3cd19294-f796-4014-9d77-8d81913450f6",
+      "name": "Claude Opus 5.5",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "F55vdjcDoR6V7tX1",
+          "name": "claude opus"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turn Claude's JSON into 4 scene items (one per destination).\nlet res = $input.first().json;\n\n// 1) Unwrap KIE envelope / string bodies\nif (typeof res === 'string') res = JSON.parse(res);\nif (typeof res.data === 'string') { try { res = JSON.parse(res.data); } catch (e) {} }\nif (res.code && res.code !== 200) throw new Error(`KIE Claude error ${res.code}: ${res.msg}`);\nconst body = res.data && (res.data.content || res.data.choices) ? res.data : res;\n\n// 2) Get the text (Anthropic format, or OpenAI-style fallback)\nlet text = '';\nif (Array.isArray(body.content)) {\n  text = body.content.filter(b => b.type === 'text').map(b => b.text).join('');\n} else if (typeof body.content === 'string') {\n  text = body.content;\n} else if (body.choices?.[0]?.message?.content) {\n  text = body.choices[0].message.content;\n}\ntext = text.trim();\nif (!text) throw new Error('Empty reply from Claude. Raw response: ' + JSON.stringify(res).slice(0, 500));\nif (body.stop_reason === 'max_tokens') throw new Error('Claude reply was cut off (max_tokens). Raise max_tokens in Build Claude Request.');\n\n// 3) Extract the JSON object even if there is text/fences around it\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('No JSON found in reply: ' + text.slice(0, 300));\nlet out;\ntry { out = JSON.parse(text.slice(start, end + 1)); }\ncatch (e) { throw new Error('Claude did not return valid JSON: ' + text.slice(0, 300)); }\n\nif (!Array.isArray(out.scenes) || out.scenes.length !== 4) throw new Error('Expected exactly 4 scenes, got ' + (out.scenes?.length ?? 0));\n\nconst meta = $('Build Claude Request').first().json;\nconst hashtags = (out.hashtags || []).join(' ');\nconst caption = `${out.caption || ''}\\n\\n${hashtags}`.trim();\n\nreturn out.scenes.map((s, i) => {\n  const destination = s.destination || meta.destinations[i];\n  let queries = (Array.isArray(s.search_queries) ? s.search_queries : [s.search_queries])\n    .map(q => String(q || '').trim()).filter(Boolean);\n  if (!queries.length) queries = [destination];\n  while (queries.length < 3) queries.push(queries[queries.length - 1]);\n  return { json: {\n    scene: i + 1,\n    row_number: meta.row_number,\n    topic: meta.topic,\n    title: (out.title || meta.topic).slice(0, 100),\n    hook: out.hook || '',\n    caption,\n    music_mood: String(out.music_mood || 'calm').toLowerCase(),\n    destination,\n    role: s.role,\n    label: s.label || destination,\n    overlay: s.overlay || '',\n    search_queries: queries.slice(0, 3)\n  }};\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11712,
+        2128
+      ],
+      "id": "34820d9f-ddb3-43d8-8c91-393b25b8283c",
+      "name": "Parse Prompts"
+    },
+    {
+      "parameters": {
+        "url": "https://api.pexels.com/videos/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[0] }}"
+            },
+            {
+              "name": "orientation",
+              "value": "portrait"
+            },
+            {
+              "name": "size",
+              "value": "medium"
+            },
+            {
+              "name": "per_page",
+              "value": "15"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10912,
+        2416
+      ],
+      "id": "b5efeab9-48ca-4fb2-8e09-c2242a4f3ea4",
+      "name": "Search Pexels"
+    },
+    {
+      "parameters": {
+        "url": "https://api.pexels.com/videos/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[1] }}"
+            },
+            {
+              "name": "orientation",
+              "value": "portrait"
+            },
+            {
+              "name": "size",
+              "value": "medium"
+            },
+            {
+              "name": "per_page",
+              "value": "15"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11072,
+        2416
+      ],
+      "id": "602092fc-29dc-45c8-a409-84f3cdb9d7e8",
+      "name": "Search Pexels (alt)",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://pixabay.com/api/videos/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[2].slice(0, 100) }}"
+            },
+            {
+              "name": "video_type",
+              "value": "film"
+            },
+            {
+              "name": "safesearch",
+              "value": "true"
+            },
+            {
+              "name": "per_page",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11232,
+        2416
+      ],
+      "id": "d9c60f2a-dec2-4d3c-887b-2adab8e3cfc7",
+      "name": "Search Pixabay",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pick the best free stock clip for every scene (Pexels first, Pixabay as fallback).\nconst CLIP_SECONDS = 7; // keep in sync with \"Build Render Script\"\nconst scenes = $('Parse Prompts').all().map(i => i.json);\nconst res = name => { try { return $(name).all().map(i => i.json); } catch (e) { return []; } };\nconst pexA = res('Search Pexels');\nconst pexB = res('Search Pexels (alt)');\nconst pix = res('Search Pixabay');\n\n// tier 1 = no quality loss after cropping to 1080x1920, tier 2 = usable (slight upscale)\nconst tierOf = (w, h) => {\n  const cropW = h > w ? w : Math.min(w, h * 9 / 16);\n  const cropH = h > w ? Math.min(h, w * 16 / 9) : h;\n  if (cropW >= 1080 && cropH >= 1900) return 1;\n  if (h >= 1080) return 2;\n  return 0;\n};\n\nconst fromPexels = (r, rank) => (r?.videos || []).flatMap((v, idx) => {\n  if ((v.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const files = (v.video_files || [])\n    .filter(f => f.link && String(f.file_type || '').includes('mp4') && f.width && f.height)\n    .map(f => ({ ...f, tier: tierOf(f.width, f.height) }))\n    .filter(f => f.tier > 0)\n    // best tier first, then the smallest file that is still good (fast download)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = files[0];\n  if (!f) return [];\n  return [{ id: `pexels-${v.id}`, url: f.link, width: f.width, height: f.height, duration: v.duration,\n    tier: f.tier, rank, idx, source: 'Pexels', credit: v.user?.name || 'Pexels', page: v.url }];\n});\n\nconst fromPixabay = (r, rank) => (r?.hits || []).flatMap((h, idx) => {\n  if ((h.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const opts = ['large', 'medium'].map(k => h.videos?.[k]).filter(v => v && v.url && v.width && v.height)\n    .map(v => ({ ...v, tier: tierOf(v.width, v.height) })).filter(v => v.tier > 0)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = opts[0];\n  if (!f) return [];\n  return [{ id: `pixabay-${h.id}`, url: f.url, width: f.width, height: f.height, duration: h.duration,\n    tier: f.tier, rank, idx, source: 'Pixabay', credit: h.user || 'Pixabay', page: h.pageURL }];\n});\n\nconst used = new Set();\nconst clips = scenes.map((s, i) => {\n  const candidates = [\n    ...fromPexels(pexA[i], 0),\n    ...fromPexels(pexB[i], 1),\n    ...fromPixabay(pix[i], 2)\n  ].filter(c => !used.has(c.id))\n   .sort((a, b) => a.tier - b.tier || a.rank - b.rank || a.idx - b.idx);\n  const c = candidates[0];\n  if (!c) throw new Error(`No usable stock clip for scene ${i + 1} (${s.destination}). Queries: ${s.search_queries.join(' | ')}. Add more generic queries or check your Pexels/Pixabay keys.`);\n  used.add(c.id);\n  // skip the first second (often a shaky start) when the clip is long enough\n  const start = c.duration >= CLIP_SECONDS + 2 ? 1 : 0;\n  return { scene: i + 1, destination: s.destination, label: s.label, overlay: s.overlay, role: s.role, start, ...c };\n});\n\nconst m = scenes[0];\nreturn [{ json: {\n  row_number: m.row_number, topic: m.topic, title: m.title, hook: m.hook, caption: m.caption,\n  music_mood: m.music_mood, clips,\n  credits: clips.map(c => `${c.source}: ${c.credit}`).join(', ')\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11392,
+        2416
+      ],
+      "id": "c4504bc1-b59d-4969-9412-c69420b24747",
+      "name": "Pick Clips"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================== EDIT HERE ==================\nconst WORK_ROOT = '/home/node/.n8n-files/shorts';   // temp render folder (must be inside N8N_RESTRICT_FILE_ACCESS_TO)\nconst MUSIC_DIR = '/home/node/.n8n-files/music';    // put royalty-free tracks here (subfolders: calm, uplifting, epic, emotional)\nconst FONT = '/usr/share/fonts/custom/Poppins-SemiBold.ttf';\nconst FONT_FALLBACK = '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf';\nconst CLIP_SECONDS = 7;     // length of each scene (keep in sync with \"Pick Clips\")\nconst FADE = 0.6;           // cross-dissolve length between scenes\nconst TRANSITION = 'fade';  // any ffmpeg xfade transition: fade, smoothup, smoothleft, fadeblack, circleopen...\nconst VW = 1080, VH = 1920, FPS = 30;\n// ===============================================\n\nconst d = $input.first().json;\nconst clips = d.clips;\nconst N = clips.length;\nconst D = CLIP_SECONDS;\nconst TOTAL = +(N * D - (N - 1) * FADE).toFixed(2);\nconst job = `row${d.row_number}_${Date.now()}`;\nconst dir = `${WORK_ROOT}/${job}`;\n\nconst b64 = s => (typeof Buffer !== 'undefined')\n  ? Buffer.from(s, 'utf8').toString('base64')\n  : btoa(unescape(encodeURIComponent(s)));\nconst f2 = n => (+n).toFixed(2);\n// Keep letters (all languages), numbers, punctuation, spaces. Drops emojis the font can't draw.\nconst clean = s => String(s || '').replace(/[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Zs}]/gu, '').replace(/\\s+/g, ' ').trim();\nconst wrap = (s, max, maxLines = 3) => {\n  const lines = [];\n  let cur = '';\n  for (const w of clean(s).split(' ').filter(Boolean)) {\n    if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; }\n    else cur = cur ? cur + ' ' + w : w;\n  }\n  if (cur) lines.push(cur);\n  return lines.slice(0, maxLines);\n};\nconst shq = s => String(s).replace(/'/g, '%27'); // URLs go inside single quotes\n\n// Opacity envelope: fade in at a, fade out ending at e (per-clip time).\nconst alpha = (a, e, fin, fout) => {\n  const inPart = fin > 0 ? `if(lt(t,${f2(a)}),0,if(lt(t,${f2(a + fin)}),(t-${f2(a)})/${f2(fin)},` : '';\n  const close = fin > 0 ? '))' : '';\n  return `'${inPart}if(lt(t,${f2(e - fout)}),1,if(lt(t,${f2(e)}),(${f2(e)}-t)/${f2(fout)},0))${close}'`;\n};\n\nconst textFiles = [];\nconst drawtext = (text, size, y, alphaExpr) => {\n  const name = `t${textFiles.length}.txt`;\n  textFiles.push(`echo '${b64(text)}' | base64 -d > ${name}`);\n  return `drawtext=fontfile=$FONT:textfile=${name}:expansion=none:fontsize=${size}:fontcolor=white` +\n    `:shadowcolor=black@0.55:shadowx=0:shadowy=4:borderw=1:bordercolor=black@0.25` +\n    `:x=(w-text_w)/2:y=${y}:alpha=${alphaExpr}`;\n};\n\nconst clipCmds = clips.map((c, i) => {\n  const isFirst = i === 0, isLast = i === N - 1;\n  const end = isLast ? D - 0.35 : D - FADE;\n  const texts = [];\n\n  // Top text: hook on scene 1 (visible from frame 1 for sound-off viewers), overlay line on the others.\n  const top = isFirst ? wrap(d.hook, 22, 4) : wrap(c.overlay, 24, 3);\n  const size = isFirst ? 78 : 64;\n  const lh = Math.round(size * 1.28);\n  const topAlpha = isFirst ? alpha(0, end, 0, 0.4) : alpha(0.45, end, 0.5, 0.4);\n  top.forEach((line, j) => texts.push(drawtext(line, size, 300 + j * lh, topAlpha)));\n\n  // Location label above the platform UI safe zone.\n  const label = clean(c.label || c.destination).toUpperCase().slice(0, 34);\n  if (label) texts.push(drawtext(label, 40, 1360, alpha(0.8, end, 0.5, 0.4)));\n\n  const vf = [\n    `scale=${VW}:${VH}:force_original_aspect_ratio=increase:flags=lanczos`,\n    `crop=${VW}:${VH}`,\n    `fps=${FPS}`,\n    'setsar=1',\n    'eq=contrast=1.05:saturation=1.12',\n    'unsharp=5:5:0.35:5:5:0',\n    'vignette=angle=0.35',\n    ...texts,\n    'format=yuv420p'\n  ].join(',');\n\n  return `dl '${shq(c.url)}' src${i}.mp4\\n` +\n    `ffmpeg -hide_banner -loglevel error -y -ss ${f2(c.start || 0)} -i src${i}.mp4 -t ${D} -an -vf \"${vf}\" ` +\n    `-r ${FPS} -c:v libx264 -preset veryfast -crf 16 -pix_fmt yuv420p c${i}.mp4 && rm -f src${i}.mp4`;\n});\n\n// Stitch: cross-dissolves between scenes + fade-out at the end.\nconst inputs = clips.map((_, i) => `-i c${i}.mp4`).join(' ');\nlet fc = clips.map((_, i) => `[${i}:v]settb=AVTB,setpts=PTS-STARTPTS[s${i}]`).join(';');\nlet prev = 's0';\nfor (let i = 1; i < N; i++) {\n  const out = i === N - 1 ? 'xl' : `x${i}`;\n  fc += `;[${prev}][s${i}]xfade=transition=${TRANSITION}:duration=${FADE}:offset=${f2(i * (D - FADE))}[${out}]`;\n  prev = out;\n}\nif (N === 1) fc += ';[s0]null[xl]';\nfc += `;[xl]fade=t=out:st=${f2(TOTAL - 0.5)}:d=0.5[vout]`;\n\nconst mood = ['calm', 'uplifting', 'epic', 'emotional'].includes(d.music_mood) ? d.music_mood : 'calm';\nconst AUDIO_EXT = `\\\\( -iname '*.mp3' -o -iname '*.m4a' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.flac' \\\\)`;\n\nconst script = `#!/bin/sh\nset -e\nDIR='${dir}'\nmkdir -p \"$DIR\" && cd \"$DIR\"\nFONT='${FONT}'\n[ -f \"$FONT\" ] || FONT='${FONT_FALLBACK}'\n${textFiles.join('\\n')}\n# download helper (uses the Node.js that ships with n8n, no curl/wget needed)\ndl() { node -e 'const [u,f]=process.argv.slice(1);const fs=require(\"fs\");const {Readable}=require(\"stream\");const {pipeline}=require(\"stream/promises\");fetch(u,{headers:{\"User-Agent\":\"Mozilla/5.0\"}}).then(r=>{if(!r.ok)throw new Error(\"HTTP \"+r.status+\" \"+u);return pipeline(Readable.fromWeb(r.body),fs.createWriteStream(f))}).catch(e=>{console.error(e.message);process.exit(1)})' \"$1\" \"$2\"; }\n\n# 1) Download, trim, crop to 9:16, grade and title each clip\n${clipCmds.join('\\n')}\n\n# 2) Music: random track from the mood folder, else any track, else silence\npick_music() { find \"$1\" -maxdepth \"$2\" -type f ${AUDIO_EXT} 2>/dev/null | awk 'BEGIN{srand()}{a[NR]=$0}END{if(NR)print a[int(rand()*NR)+1]}'; }\nMUSIC=$(pick_music '${MUSIC_DIR}/${mood}' 1)\n[ -n \"$MUSIC\" ] || MUSIC=$(pick_music '${MUSIC_DIR}' 2)\nif [ -n \"$MUSIC\" ]; then\n  ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i \"$MUSIC\" -t ${TOTAL} -af \"loudnorm=I=-14:TP=-1.5:LRA=11,afade=t=in:st=0:d=0.8,afade=t=out:st=${f2(TOTAL - 2.5)}:d=2.5\" -ar 48000 -ac 2 music.wav\nelse\n  ffmpeg -hide_banner -loglevel error -y -f lavfi -i anullsrc=r=48000:cl=stereo -t ${TOTAL} music.wav\nfi\n\n# 3) Stitch with cross-dissolves and export (H.264 High, 1080x1920, 30fps, AAC)\nffmpeg -hide_banner -loglevel error -y ${inputs} -i music.wav -filter_complex \"${fc}\" -map \"[vout]\" -map ${N}:a -c:v libx264 -preset slow -crf 18 -profile:v high -pix_fmt yuv420p -r ${FPS} -g ${FPS * 2} -c:a aac -b:a 192k -ar 48000 -movflags +faststart -t ${TOTAL} final.mp4\n[ -s final.mp4 ]\necho \"MUSIC=\\${MUSIC:-none}\"\necho \"$DIR/final.mp4\"\n`;\n\nconst slug = clean(d.title || 'short').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60) || 'short';\nreturn [{ json: {\n  ...d,\n  job_dir: dir,\n  output_path: `${dir}/final.mp4`,\n  file_name: `${slug}-${job}.mp4`,\n  duration: TOTAL,\n  command: `mkdir -p '${dir}' && echo '${b64(script)}' | base64 -d > '${dir}/render.sh' && sh '${dir}/render.sh'`\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10912,
+        2704
+      ],
+      "id": "9fe93425-db14-4780-8832-cf2c2dd4ddeb",
+      "name": "Build Render Script"
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.command }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        11072,
+        2704
+      ],
+      "id": "2b0b3d23-1073-4a0f-87b3-1bd4acdd0a6e",
+      "name": "Render with FFmpeg"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $('Build Render Script').first().json.output_path }}",
+        "options": {
+          "fileName": "={{ $('Build Render Script').first().json.file_name }}",
+          "mimeType": "video/mp4"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        11232,
+        2704
+      ],
+      "id": "e2ac1939-2c97-469a-ab82-2de301b588e8",
+      "name": "Read Final Video"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Build Render Script').first().json.file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        10912,
+        2992
+      ],
+      "id": "7127daa4-88d2-48ca-b9e6-399558ecc209",
+      "name": "Upload to Drive"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        11072,
+        2992
+      ],
+      "id": "3ec1d2e7-d417-462e-a8f8-bfc96d4938bd",
+      "name": "Make Public"
+    },
+    {
+      "parameters": {
+        "jsCode": "const id = $('Upload to Drive').first().json.id;\nif (!id) throw new Error('Google Drive upload returned no file id');\nconst meta = $('Build Render Script').first().json;\nreturn [{ json: {\n  row_number: meta.row_number,\n  title: meta.title,\n  caption: meta.caption,\n  credits: meta.credits,\n  file_id: id,\n  url: `https://drive.google.com/uc?export=download&id=${id}`,\n  view_url: `https://drive.google.com/file/d/${id}/view`\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11232,
+        2992
+      ],
+      "id": "ed6d4934-48f5-4bdf-9226-f722e9cb5509",
+      "name": "Public Video URL"
+    },
+    {
+      "parameters": {
+        "command": "={{ \"rm -rf '\" + $('Build Render Script').first().json.job_dir + \"'\" }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        11392,
+        2992
+      ],
+      "id": "3b6e7ca6-27f7-4f38-9078-d8ccb0eddb69",
+      "name": "Cleanup Temp Files",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12400,
+        2576
+      ],
+      "id": "ba36d57c-038d-4f0e-8d4a-d573ab1271f5",
+      "name": "Upload to Blotato"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"instagram\" }, content: { text: $('Public Video URL').first().json.caption, platform: \"instagram\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12608,
+        2192
+      ],
+      "id": "98d43109-8a8a-431b-a64a-3ab996f8a06b",
+      "name": "Instagram"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"tiktok\", isYourBrand: false, disabledDuet: false, privacyLevel: \"PUBLIC_TO_EVERYONE\", isAiGenerated: false, disabledStitch: false, disabledComments: false, isBrandedContent: false }, content: { text: $('Public Video URL').first().json.caption, platform: \"tiktok\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12608,
+        2432
+      ],
+      "id": "a84b78a1-246c-4612-891e-1e780c917e96",
+      "name": "TikTok"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://backend.blotato.com/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"youtube\", title: $('Public Video URL').first().json.title, privacyStatus: \"public\", shouldNotifySubscribers: true }, content: { text: $('Public Video URL').first().json.caption, platform: \"youtube\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12608,
+        2672
+      ],
+      "id": "f375f2cf-14bd-4d69-82b3-d7f1d4337fb4",
+      "name": "YouTube"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow",
+          "mode": "list",
+          "cachedResultName": "Get posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Get posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rZLh5E-e5x_OGCKb2BZXKScyqHh-TY3Od_koIDuUhow/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Public Video URL').first().json.row_number }}",
+            "Status": "Posted",
+            "Video URL": "={{ $('Public Video URL').first().json.view_url }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination 1",
+              "displayName": "Destination 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination 2",
+              "displayName": "Destination 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination 3",
+              "displayName": "Destination 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination 4",
+              "displayName": "Destination 4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        12608,
+        2912
+      ],
+      "id": "5e271fd0-ec16-402c-9601-4003843f684c",
+      "name": "Update Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Story Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Story Rows": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Next Row": {
+      "main": [
+        [
+          {
+            "node": "Build Claude Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Claude Request": {
+      "main": [
+        [
+          {
+            "node": "Claude Opus 5.5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Opus 5.5": {
+      "main": [
+        [
+          {
+            "node": "Parse Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Prompts": {
+      "main": [
+        [
+          {
+            "node": "Search Pexels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pexels": {
+      "main": [
+        [
+          {
+            "node": "Search Pexels (alt)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pexels (alt)": {
+      "main": [
+        [
+          {
+            "node": "Search Pixabay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pixabay": {
+      "main": [
+        [
+          {
+            "node": "Pick Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Clips": {
+      "main": [
+        [
+          {
+            "node": "Build Render Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Render Script": {
+      "main": [
+        [
+          {
+            "node": "Render with FFmpeg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render with FFmpeg": {
+      "main": [
+        [
+          {
+            "node": "Read Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Final Video": {
+      "main": [
+        [
+          {
+            "node": "Upload to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Drive": {
+      "main": [
+        [
+          {
+            "node": "Make Public",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make Public": {
+      "main": [
+        [
+          {
+            "node": "Public Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Public Video URL": {
+      "main": [
+        [
+          {
+            "node": "Upload to Blotato",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cleanup Temp Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Blotato": {
+      "main": [
+        [
+          {
+            "node": "Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "YouTube",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "tags": []
+}

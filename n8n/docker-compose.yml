@@ -1,0 +1,19 @@
+services:
+  n8n:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=UTC # change to your timezone, e.g. Europe/Paris
+      # Execute Command is disabled by default in recent n8n versions; the workflow needs it for FFmpeg.
+      - NODES_EXCLUDE=[]
+      # Folder the Read/Write Files node is allowed to use (renders + music live here).
+      - N8N_RESTRICT_FILE_ACCESS_TO=/home/node/.n8n-files
+      # Keep large video binaries out of the database.
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./music:/home/node/.n8n-files/music
+volumes:
+  n8n_data:
