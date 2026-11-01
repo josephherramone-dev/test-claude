@@ -1,0 +1,465 @@
+{
+  "name": "WF 7 - Travelistguide — Posts pending to Postiz (Facebook + Instagram)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## WF7 — Posts pending ➜ Postiz (Facebook + Instagram)\nPublishes **exactly** what WF4 wrote to the *Posts pending* tab.\n\n**Setup (once)**\n1. In the *Posts pending* tab add 4 header cells after the existing ones:\n`FB_Scheduled_For | IG_Scheduled_For | Postiz_IDs | Publish_Log`\n(Status already exists — WF7 overwrites it.)\n2. Postiz ➜ Settings ➜ Public API ➜ copy the key.\nn8n credential **Header Auth** named `Postiz API`:\nName `Authorization` · Value `<your key>` (no \"Bearer\").\nSelect it on the 3 orange Postiz nodes.\n3. **Config** ➜ set `postiz_base` = `https://<your-postiz-domain>/api/public/v1` and `timezone` = your audience's timezone.\nFB/IG channels are auto-detected from Postiz.\n4. Test with `post_type: 'draft'` first, then switch to `schedule`.\n\n**Status flow:** Pending (WF4) ➜ [Approved if require_approval] ➜ Scheduled / Posted / Postiz Draft / Partial / Error.\nRows with Postiz_IDs are never posted twice. To retry an Error row: fix it, set Status back to Pending.",
+        "height": 620,
+        "width": 560,
+        "color": 4
+      },
+      "id": "a8896f04-49a5-4fe8-851a-12adfc3ec66d",
+      "name": "Sticky — Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Platform rules applied automatically\n**Facebook** — lunchtime slot · post body from `Facebook_Post` · 1-3 hashtags · ends on WF4's question (comments) · links stripped from body (reach penalty) ➜ optional `facebook_link` goes in the first comment.\n\n**Instagram** — evening slot · `Instagram_Caption` · hook must fit before the \"...more\" cut (~125 chars, else WF4's Hook is put on top) · save/share CTA appended · max 5 hashtags (Instagram's cap): 3 niche + 1 broad + brand.\n\n**Both** — never the same minute (staggered + random jitter) · one post/day/platform by default · queue continues after the last scheduled post, max 7 days ahead · highest Awareness_Score first.\n\n**YouTube** — video only: Postiz can't put an image on YouTube ➜ handled by the Shorts workflow (WF6).",
+        "height": 620,
+        "width": 560,
+        "color": 6
+      },
+      "id": "38660c73-cd46-41df-b68c-54e72b70ce75",
+      "name": "Sticky — Platform rules",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "10adc800-2158-4baf-866f-78b8c3e3acd6",
+      "name": "Daily 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c1afd4b5-fb6a-4280-8b47-3ca6b247fa4d",
+      "name": "Manual Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===================== EDIT THESE =====================\nreturn [{ json: {\n  // Your Postiz in Coolify + /api/public/v1  (Postiz > Settings > Public API gives the key)\n  postiz_base: 'https://postiz.YOUR-DOMAIN.com/api/public/v1',\n\n  // Timezone of your AUDIENCE (not your server). IANA name.\n  timezone: 'Europe/London',\n\n  post_type: 'schedule',      // schedule | now | draft  (draft = lands in Postiz for a final look)\n  require_approval: false,    // true = only rows whose Status you changed to \"Approved\" get posted\n\n  posts_per_run: 3,           // how many sheet rows to queue per run\n  max_days_ahead: 7,          // never queue further out than this\n  facebook_times: ['12:30'],  // one entry per post per day, local time. 2/day: ['09:00','15:00']\n  instagram_times: ['19:00'], // same length as facebook_times.            2/day: ['12:00','20:00']\n  jitter_minutes: 12,         // random 0-12 min offset so posts don't land on robotic :00 / :30\n\n  brand_hashtag: '#travelistguide',\n  instagram_max_hashtags: 5,  // Instagram caps posts at 5 hashtags\n  facebook_max_hashtags: 3,   // Facebook: 1-3 hashtags, more looks spammy\n  facebook_link: '',          // optional URL -> posted as the FIRST COMMENT, never in the post body\n\n  platforms: ['facebook', 'instagram'],\n  facebook_integration_id: '',  // blank = auto-detect from Postiz\n  instagram_integration_id: ''  // blank = auto-detect from Postiz\n}}];\n"
+      },
+      "id": "08dfac6b-f7af-456a-bec5-1fbdfe8477a4",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.postiz_base }}/integrations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "f715976c-cd8b-4363-b09d-897b0ea27488",
+      "name": "Postiz — List Channels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk",
+          "mode": "list",
+          "cachedResultName": "test sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1513756190,
+          "mode": "list",
+          "cachedResultName": "Posts pending",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit#gid=1513756190"
+        },
+        "options": {}
+      },
+      "id": "623b5c4b-365f-4ba6-9af9-3193d9eebc5f",
+      "name": "Read Posts Pending",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst tz = cfg.timezone || 'UTC';\nconst now = DateTime.now().setZone(tz);\nconst norm = s => String(s ?? '').trim();\nconst low = s => norm(s).toLowerCase();\n\n// ---------- 1. Resolve the Postiz channels ----------\nlet ints = $('Postiz — List Channels').all().map(i => i.json);\nif (ints.length === 1 && Array.isArray(ints[0].integrations)) ints = ints[0].integrations;\nints = ints.filter(x => x && x.id);\nconst ident = x => low(x.identifier || x.providerIdentifier || x.provider);\nconst findChannel = (types, pinned) => pinned\n  ? (ints.find(x => x.id === pinned) || null)\n  : (ints.find(x => types.includes(ident(x)) && !x.disabled) || null);\n\nconst channels = {};\nif (cfg.platforms.includes('facebook')) {\n  const c = findChannel(['facebook'], cfg.facebook_integration_id);\n  if (c) channels.facebook = c;\n}\nif (cfg.platforms.includes('instagram')) {\n  const c = findChannel(['instagram', 'instagram-standalone'], cfg.instagram_integration_id);\n  if (c) channels.instagram = c;\n}\nif (!Object.keys(channels).length) {\n  throw new Error('No Facebook/Instagram channel found in Postiz. Channels seen: ' +\n    (ints.map(x => ident(x) + ' (' + x.name + ')').join(', ') || 'none - check postiz_base and the Postiz API key'));\n}\nconst plats = Object.keys(channels);\n\n// ---------- 2. Rows that are ready to publish ----------\nconst rows = $('Read Posts Pending').all().map(i => i.json);\nconst allowed = cfg.require_approval ? ['approved'] : ['pending', 'approved'];\nconst eligible = rows\n  .filter(r =>\n    norm(r.Content_ID) &&\n    allowed.includes(low(r.Status)) &&\n    /^https?:\\/\\//.test(norm(r.KIE_Image_URL)) &&\n    (norm(r.Facebook_Post) || norm(r.Instagram_Caption)) &&\n    !norm(r.Postiz_IDs))\n  .sort((a, b) =>\n    (Number(b.Awareness_Score) || 0) - (Number(a.Awareness_Score) || 0) ||\n    String(a.Date).localeCompare(String(b.Date)));\nif (!eligible.length) return [];\n\n// ---------- 3. Next free slots (continues after what is already queued) ----------\nconst at = (day, hhmm) => {\n  const [h, m] = String(hhmm).split(':').map(Number);\n  return day.set({ hour: h || 0, minute: m || 0, second: 0, millisecond: 0 });\n};\nconst parse = v => {\n  if (!norm(v)) return null;\n  const d = DateTime.fromISO(norm(v), { setZone: true });\n  return d.isValid ? d : null;\n};\nlet lastQueued = null;\nfor (const r of rows) {\n  const t = [parse(r.FB_Scheduled_For), parse(r.IG_Scheduled_For)].filter(Boolean);\n  if (!t.length) continue;\n  const anchor = DateTime.min(...t);\n  if (!lastQueued || anchor > lastQueued) lastQueued = anchor;\n}\n\nconst jitter = () => Math.floor(Math.random() * ((Number(cfg.jitter_minutes) || 0) + 1));\nconst perDay = Math.max(1, Math.min(cfg.facebook_times.length, cfg.instagram_times.length));\nconst maxRows = Math.max(1, Number(cfg.posts_per_run) || 1);\nconst slots = [];\nif (cfg.post_type === 'now') {\n  slots.push({ facebook: now, instagram: now }); // never blast several posts at once\n} else {\n  for (let d = 0; d <= cfg.max_days_ahead && slots.length < maxRows; d++) {\n    const day = now.startOf('day').plus({ days: d });\n    for (let s = 0; s < perDay && slots.length < maxRows; s++) {\n      const base = { facebook: at(day, cfg.facebook_times[s]), instagram: at(day, cfg.instagram_times[s]) };\n      const anchor = DateTime.min(...plats.map(p => base[p]));\n      if (anchor <= now.plus({ minutes: 15 })) continue;\n      if (lastQueued && anchor <= lastQueued) continue;\n      slots.push({\n        facebook: base.facebook.plus({ minutes: jitter() }),\n        instagram: base.instagram.plus({ minutes: jitter() })\n      });\n    }\n  }\n}\nif (!slots.length) return []; // queue is already full for max_days_ahead\n\n// ---------- 4. Platform-specific copy ----------\nconst GENERIC = new Set(['#travel', '#wellness', '#wanderlust', '#explore', '#nature', '#travelgram',\n  '#instatravel', '#travelphotography', '#vacation', '#holiday', '#trip', '#instagood', '#photooftheday',\n  '#selfcare', '#health', '#relax', '#yoga', '#spa', '#mindfulness', '#travelblogger', '#adventure']);\n\nconst parseTags = s => {\n  const seen = new Set();\n  return (norm(s).match(/#?[\\p{L}\\p{N}_]+/gu) || [])\n    .map(t => '#' + t.replace(/^#/, ''))\n    .filter(t => { const k = low(t); if (seen.has(k)) return false; seen.add(k); return true; });\n};\n\n// 1 broad tag for reach, the rest niche (niche tags rank better), brand tag last\nconst chooseTags = (all, max) => {\n  const brand = norm(cfg.brand_hashtag) ? [norm(cfg.brand_hashtag)] : [];\n  const pool = all.filter(t => !brand.some(b => low(b) === low(t)));\n  const niche = pool.filter(t => !GENERIC.has(low(t)));\n  const broad = pool.filter(t => GENERIC.has(low(t)));\n  const room = Math.max(0, max - brand.length);\n  let picked = niche.slice(0, Math.max(0, room - 1));\n  picked = picked.concat(broad.slice(0, room - picked.length));\n  for (const t of niche) { if (picked.length >= room) break; if (!picked.includes(t)) picked.push(t); }\n  return [...picked.slice(0, room), ...brand].slice(0, max);\n};\n\n// remove hashtag-only lines, un-hash inline tags (we add our own curated set)\nconst stripTags = text => norm(text).split('\\n')\n  .filter(line => !/^\\s*(#[\\p{L}\\p{N}_]+[\\s,.]*)+$/u.test(line))\n  .join('\\n')\n  .replace(/#([\\p{L}\\p{N}_]+)/gu, '$1')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nconst instagramCaption = (r, tags) => {\n  let body = stripTags(r.Instagram_Caption || r.Facebook_Post);\n  const hook = norm(r.Hook);\n  const first = body.split('\\n')[0] || '';\n  // Instagram cuts the caption at ~125 chars (\"... more\"): the hook must fit before that\n  if (hook && first.length > 125 && hook.length <= 125 && !low(body).includes(low(hook))) body = hook + '\\n\\n' + body;\n  const cta = stripTags(r.CTA);\n  if (cta && !low(body).includes(low(cta).slice(0, 25))) body += '\\n\\n' + cta;\n  const tagLine = tags.join(' ');\n  const maxBody = 2200 - tagLine.length - 4;\n  if (body.length > maxBody) body = body.slice(0, maxBody - 1).replace(/\\s+\\S*$/, '') + '…';\n  return (body + (tagLine ? '\\n\\n' + tagLine : '')).trim();\n};\n\nconst facebookPost = (r, tags) => {\n  let body = stripTags(r.Facebook_Post || r.Instagram_Caption);\n  // links in the post body cut Facebook reach -> the link goes in the first comment instead\n  body = body.replace(/[ \\t]*https?:\\/\\/\\S+/g, '').replace(/[ \\t]+\\n/g, '\\n').trim();\n  return (body + (tags.length ? '\\n\\n' + tags.join(' ') : '')).trim();\n};\n\nconst iso = d => d.toISO({ suppressMilliseconds: true });\n\nreturn eligible.slice(0, slots.length).map((r, i) => {\n  const slot = slots[i];\n  const all = parseTags(r.Hashtags);\n  const posts = [];\n  if (channels.facebook) posts.push({\n    platform: 'facebook',\n    integration_id: channels.facebook.id,\n    settings: { __type: 'facebook' },\n    content: facebookPost(r, chooseTags(all, cfg.facebook_max_hashtags)),\n    comment: norm(cfg.facebook_link) ? 'Full guide here: ' + norm(cfg.facebook_link) : '',\n    date_utc: iso(slot.facebook.toUTC()),\n    date_local: iso(slot.facebook)\n  });\n  if (channels.instagram) posts.push({\n    platform: 'instagram',\n    integration_id: channels.instagram.id,\n    settings: { __type: ident(channels.instagram) || 'instagram', post_type: 'post', is_trial_reel: false, collaborators: [] },\n    content: instagramCaption(r, chooseTags(all, cfg.instagram_max_hashtags)),\n    comment: '',\n    date_utc: iso(slot.instagram.toUTC()),\n    date_local: iso(slot.instagram)\n  });\n  return { json: {\n    content_id: norm(r.Content_ID),\n    row_number: r.row_number,\n    topic: r.Topic,\n    awareness_score: r.Awareness_Score,\n    image_url: norm(r.KIE_Image_URL),\n    posts\n  }};\n});\n"
+      },
+      "id": "0807dc21-b944-47d8-a0bf-e65e456d9247",
+      "name": "Pick Rows + Plan Slots",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.postiz_base }}/upload-from-url",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 120000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ url: $json.image_url }) }}"
+      },
+      "id": "4efff23e-7729-4b52-a3cd-32c549fec52d",
+      "name": "Postiz — Upload Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst match = (node, i) => { try { return $(node).itemMatching(i).json; } catch (e) { return $(node).all()[i].json; } };\n\nconst out = [];\n$input.all().forEach((it, i) => {\n  const row = match('Pick Rows + Plan Slots', i);\n  const up = it.json || {};\n  if (up.error || !up.path) {\n    const msg = up.error ? (up.error.message || JSON.stringify(up.error)) : JSON.stringify(up).slice(0, 200);\n    out.push({ json: { ready: false, content_id: row.content_id,\n      error: 'Image upload to Postiz failed (KIE image URLs expire after ~14 days - regenerate the image): ' + msg } });\n    return;\n  }\n  const image = [{ id: up.id, path: up.path }];\n  for (const p of row.posts) {\n    const value = [{ content: p.content, image }];\n    if (p.comment) value.push({ content: p.comment, image: [] }); // 2nd value = first comment\n    out.push({ json: {\n      ready: true,\n      content_id: row.content_id,\n      platform: p.platform,\n      scheduled_for: cfg.post_type === 'now' ? '' : p.date_local,\n      postBody: {\n        type: cfg.post_type,\n        date: p.date_utc,\n        shortLink: false,\n        tags: [],\n        posts: [{ integration: { id: p.integration_id }, value, settings: p.settings }]\n      }\n    }});\n  }\n});\nreturn out;\n"
+      },
+      "id": "10fb6d32-5aa0-460f-88ab-bf4e969f6216",
+      "name": "Build Postiz Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ready-1",
+              "leftValue": "={{ $json.ready }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "97485ace-c451-4fad-85eb-411b2c4e8568",
+      "name": "Ready to Post?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.postiz_base }}/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 120000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.postBody) }}"
+      },
+      "id": "2162ab83-f5b3-4e85-9c49-1cc56cb65b33",
+      "name": "Postiz — Create Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst match = (node, i) => {\n  try { return $(node).itemMatching(i).json; }\n  catch (e) { return $(node).all().map(x => x.json).filter(x => x.ready)[i]; }\n};\n\nconst groups = {};\n$input.all().forEach((it, i) => {\n  const req = match('Build Postiz Requests', i);\n  const r = it.json || {};\n  const id = r.postId || r.id || '';\n  const err = r.error\n    ? (r.error.message || r.error.description || JSON.stringify(r.error))\n    : (!id ? 'no post id returned: ' + JSON.stringify(r).slice(0, 200) : '');\n  const g = groups[req.content_id] = groups[req.content_id] || { content_id: req.content_id, res: [] };\n  g.res.push({ platform: req.platform, ok: !err, id, when: req.scheduled_for, err });\n});\n\nconst okWord = { schedule: 'Scheduled', now: 'Posted', draft: 'Postiz Draft' }[cfg.post_type] || 'Scheduled';\nconst stamp = DateTime.now().setZone(cfg.timezone || 'UTC').toFormat('yyyy-MM-dd HH:mm');\n\nreturn Object.values(groups).map(g => {\n  const ok = g.res.filter(x => x.ok);\n  const bad = g.res.filter(x => !x.ok);\n  const when = p => (g.res.find(x => x.platform === p && x.ok) || {}).when || '';\n  return { json: {\n    Content_ID: g.content_id,\n    Status: !bad.length ? okWord : (ok.length ? 'Partial - check Postiz' : 'Error'),\n    FB_Scheduled_For: when('facebook'),\n    IG_Scheduled_For: when('instagram'),\n    Postiz_IDs: ok.map(x => x.platform + ':' + x.id).join(' | '),\n    Publish_Log: stamp + ' | ' + g.res.map(x => x.platform + (x.ok ? ' OK ' + (x.when || 'now') : ' FAILED ' + x.err)).join(' | ')\n  }};\n});\n"
+      },
+      "id": "40ea8f88-2df4-4d4f-a671-fef467e8678b",
+      "name": "Collect Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst stamp = DateTime.now().setZone(cfg.timezone || 'UTC').toFormat('yyyy-MM-dd HH:mm');\nreturn $input.all().map(i => ({ json: {\n  Content_ID: i.json.content_id,\n  Status: 'Error',\n  FB_Scheduled_For: '',\n  IG_Scheduled_For: '',\n  Postiz_IDs: '',\n  Publish_Log: stamp + ' | ' + i.json.error\n}}));\n"
+      },
+      "id": "c26164fa-1ad6-4f4a-9cd2-8c078dbc05a1",
+      "name": "Format Errors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk",
+          "mode": "list",
+          "cachedResultName": "test sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1513756190,
+          "mode": "list",
+          "cachedResultName": "Posts pending",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit#gid=1513756190"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Content_ID": "={{ $json.Content_ID }}",
+            "Status": "={{ $json.Status }}",
+            "FB_Scheduled_For": "={{ $json.FB_Scheduled_For }}",
+            "IG_Scheduled_For": "={{ $json.IG_Scheduled_For }}",
+            "Postiz_IDs": "={{ $json.Postiz_IDs }}",
+            "Publish_Log": "={{ $json.Publish_Log }}"
+          },
+          "matchingColumns": [
+            "Content_ID"
+          ],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "182365ef-268d-46c0-ad6f-8ac902416d34",
+      "name": "Update Sheet Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2200,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 07:00": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Run": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Postiz — List Channels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postiz — List Channels": {
+      "main": [
+        [
+          {
+            "node": "Read Posts Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Posts Pending": {
+      "main": [
+        [
+          {
+            "node": "Pick Rows + Plan Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Rows + Plan Slots": {
+      "main": [
+        [
+          {
+            "node": "Postiz — Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postiz — Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Build Postiz Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Postiz Requests": {
+      "main": [
+        [
+          {
+            "node": "Ready to Post?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready to Post?": {
+      "main": [
+        [
+          {
+            "node": "Postiz — Create Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postiz — Create Post": {
+      "main": [
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Results": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Errors": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "tags": []
+}
