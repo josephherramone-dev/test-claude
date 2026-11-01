@@ -1,0 +1,939 @@
+{
+  "name": "WF 5 - Travelistguide — KIE.AI Stories Machine (IG + FB) for Postiz",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## WF 5 — STORIES MACHINE (IG + FB)\nGenerates multi-frame 9:16 stories → KIE.AI images → Google Sheet (Status = Pending) → approve → publish with Postiz.\n\n**Sheet tabs needed (same spreadsheet):**\n- `Stories pending`\n- `Stories rejected`\nPaste the header row from the README into row 1 of both tabs.",
+        "height": 320,
+        "width": 760,
+        "color": 1
+      },
+      "id": "c9eab9c5-3c17-448a-b03d-9efd352626c8",
+      "name": "Sticky — Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 1 — STORY RESEARCH\nSchedule → Config → Read existing stories → KIE Chat → Parse ideas + duplicate check.",
+        "height": 400,
+        "width": 1300,
+        "color": 4
+      },
+      "id": "2a7f8fa1-4060-4e65-91a7-35d91bace245",
+      "name": "Sticky — Phase 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 2 — STORY SCORE\nScore 0–100 for story performance (completion, replies, sticker taps). LOW → Stories rejected.",
+        "height": 400,
+        "width": 600,
+        "color": 5
+      },
+      "id": "5a6b55f0-6d03-46e5-ae7f-83f552d30549",
+      "name": "Sticky — Phase 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 3 — STORY SCRIPT\nFrame-by-frame: on-screen text, sticker idea, CTA, 9:16 image prompt. Split into 1 item per frame.",
+        "height": 400,
+        "width": 780,
+        "color": 6
+      },
+      "id": "3f160fa8-4c60-4b58-9f8a-d1ea3017f27e",
+      "name": "Sticky — Phase 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 4 — KIE.AI 9:16 IMAGES\nCreate task → wait → fetch → extract URL (one image per frame).\nModel: nano-banana-2-lite, aspect 9:16",
+        "height": 400,
+        "width": 800,
+        "color": 7
+      },
+      "id": "cd13358c-5b2f-4437-8beb-d184685d81a8",
+      "name": "Sticky — Phase 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3100,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PHASE 5 — APPROVAL → POSTIZ\nOne row per frame, Status = Pending. Set Status = Approved, then your Postiz publisher posts each frame as a story (post type = story), in Frame_Number order.",
+        "height": 400,
+        "width": 420,
+        "color": 3
+      },
+      "id": "fb09f851-c82d-4eb3-902c-90a20574b801",
+      "name": "Sticky — Phase 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3920,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "id": "df1abde9-3d6e-474b-b8be-14b96c05e18d",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "brand_name",
+              "value": "Travelistguide",
+              "type": "string"
+            },
+            {
+              "id": "c2",
+              "name": "niche",
+              "value": "Wellness travel",
+              "type": "string"
+            },
+            {
+              "id": "c3",
+              "name": "platforms",
+              "value": "Instagram Stories, Facebook Stories",
+              "type": "string"
+            },
+            {
+              "id": "c4",
+              "name": "story_pillars",
+              "value": "Wellness destinations, Nature escapes, Quick travel tips, Yoga & spa moments, Mindfulness prompts, Slow travel, Digital detox, Healthy travel habits, Retreat teasers, This-or-that polls, Packing checklists, Myth vs fact",
+              "type": "string"
+            },
+            {
+              "id": "c5",
+              "name": "stories_per_run",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "c6",
+              "name": "frames_per_story",
+              "value": 4,
+              "type": "number"
+            },
+            {
+              "id": "c7",
+              "name": "min_story_score",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "c8",
+              "name": "language",
+              "value": "English",
+              "type": "string"
+            },
+            {
+              "id": "c9",
+              "name": "link_url",
+              "value": "https://travelistguide.com",
+              "type": "string"
+            },
+            {
+              "id": "c10",
+              "name": "render_text_on_image",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "c11",
+              "name": "posting_hour_utc",
+              "value": 17,
+              "type": "number"
+            },
+            {
+              "id": "c12",
+              "name": "minutes_between_frames",
+              "value": 2,
+              "type": "number"
+            },
+            {
+              "id": "c13",
+              "name": "postiz_post_type",
+              "value": "story",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9755af4-283d-4c01-bf49-badec9ff0658",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk",
+          "mode": "list",
+          "cachedResultName": "test sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Stories pending",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "697062e0-abec-4b43-a29b-745e44f624eb",
+      "name": "Get Existing Stories",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        512,
+        1712
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst rows = $input.all().map(i => i.json).filter(r => r && (r.Topic || r.topic));\n// Several rows share one topic (one row per frame) → dedupe\nconst existing = [...new Set(rows.map(r => String(r.Topic || r.topic).trim()).filter(Boolean))];\n// Only send the most recent 150 topics to keep the prompt small\nconst recent = existing.slice(-150);\nreturn [{\n  json: {\n    ...cfg,\n    existing_topics: existing,\n    existing_count: existing.length,\n    existing_topic_block: recent.length ? recent.join('  ||  ') : 'NONE - first run'\n  }\n}];"
+      },
+      "id": "fe5d49be-1ee5-43b2-baba-0ce3d141c2c0",
+      "name": "Merge Config + Existing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Merge Config + Existing').first().json;\n\nconst sys = 'You are a senior Instagram & Facebook Stories strategist for a wellness-travel brand. Return ONLY valid JSON, no markdown fences, no explanation.';\n\nconst user = [\n  'Propose ' + cfg.stories_per_run + ' fresh STORY ideas for ' + cfg.platforms + ' for the brand ' + cfg.brand_name + ' (' + cfg.niche + ').',\n  'A story idea = a short sequence of ' + cfg.frames_per_story + ' vertical 9:16 frames viewed in ~15 seconds each.',\n  '',\n  'STORY PILLARS:',\n  cfg.story_pillars,\n  '',\n  'ALREADY USED STORY TOPICS (never repeat, never propose close variations):',\n  cfg.existing_topic_block,\n  '',\n  'GOOD STORY FORMATS: Poll, Quiz, This-or-That, Question box, Quick tips, Checklist, Myth vs Fact, Destination teaser, Countdown, Behind-the-scenes, Mini-guide, Mood board.',\n  '',\n  'HARD RULES:',\n  '- Ideas must work in a fast, tap-through, mobile-first format (very little text).',\n  '- At least one idea must be interactive (poll / quiz / question / slider).',\n  '- Never invent statistics, prices or follower counts. Any number must be labelled \"(AI estimate)\".',\n  '- Write in ' + cfg.language + ' only.',\n  '- Return ONLY valid JSON.',\n  '',\n  'Return this exact shape:',\n  '{\"stories\":[{\"topic\":\"\",\"story_format\":\"Poll|Quiz|This-or-That|Question box|Quick tips|Checklist|Myth vs Fact|Destination teaser|Countdown|Behind-the-scenes|Mini-guide|Mood board\",\"primary_keyword\":\"\",\"secondary_keywords\":[\"\",\"\"],\"goal\":\"Engagement|Reach|Profile visits|Link clicks\",\"why_now\":\"\",\"data_note\":\"AI estimate - no live data used\"}]}'\n].join('\\n');\n\nreturn [{ json: { model: 'deepseek-v4-1-flash', stream: false, instructions: sys, input: [{ role: 'user', content: user }] } }];"
+      },
+      "id": "0819399b-f6aa-48b5-89b3-d8c99b6e3ea9",
+      "name": "Build Story Research Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/openai/v1/responses",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "73c25434-8625-4911-b826-4a202814023e",
+      "name": "KIE Chat — Story Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        1712
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PDgaO63PjBvVRxtb",
+          "name": "KIE API"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractText(resp) {\n  if (!resp) return null;\n  if (typeof resp === 'string') return resp;\n  function fromOutput(obj) {\n    if (!obj || !Array.isArray(obj.output)) return null;\n    for (const item of obj.output) {\n      if (item && item.type === 'message' && Array.isArray(item.content)) {\n        for (const c of item.content) {\n          if (c && typeof c.text === 'string' && c.text.trim()) return c.text;\n        }\n      }\n    }\n    return null;\n  }\n  let t = fromOutput(resp);\n  if (t) return t;\n  if (resp.data) { t = fromOutput(resp.data); if (t) return t; }\n  if (resp.choices && resp.choices[0] && resp.choices[0].message) return resp.choices[0].message.content;\n  if (resp.data && resp.data.choices && resp.data.choices[0] && resp.data.choices[0].message) return resp.data.choices[0].message.content;\n  if (typeof resp.text === 'string') return resp.text;\n  if (typeof resp.content === 'string') return resp.content;\n  return null;\n}\nfunction extractJson(str) {\n  if (!str) return null;\n  try { return JSON.parse(str); } catch (e) {}\n  const cleaned = String(str).replace(/```json/gi, '').replace(/```/g, '').trim();\n  try { return JSON.parse(cleaned); } catch (e) {}\n  const a = cleaned.indexOf('{'), b = cleaned.lastIndexOf('}');\n  if (a !== -1 && b !== -1) { try { return JSON.parse(cleaned.slice(a, b + 1)); } catch (e) {} }\n  return null;\n}\n\nconst text = extractText($input.first().json);\nif (!text) throw new Error('No text in KIE response. Raw: ' + JSON.stringify($input.first().json).slice(0, 500));\n\nconst parsed = extractJson(text);\nconst list = parsed && (Array.isArray(parsed.stories) ? parsed.stories : (Array.isArray(parsed.topics) ? parsed.topics : null));\nif (!list) throw new Error('Could not parse stories[]. Preview: ' + text.slice(0, 500));\n\nconst existing = ($('Merge Config + Existing').first().json.existing_topics || []).map(t => String(t).toLowerCase());\nconst STOP = new Set(['the','a','an','and','or','for','to','of','in','on','with','your','you','best','top','how','why','is','are','it','this','that','travel','wellness','guide','tips','story','stories','vs','quick']);\nconst words = s => String(s).toLowerCase().replace(/[^a-z0-9\\s]/g, ' ').split(/\\s+/).filter(w => w && !STOP.has(w));\n\nconst out = [];\nconst seenThisRun = [];\nfor (const t of list) {\n  if (!t || !t.topic) continue;\n  const w = new Set(words(t.topic));\n  let dupOf = null, best = 0;\n  for (const ex of existing.concat(seenThisRun)) {\n    const ew = words(ex);\n    if (!ew.length || !w.size) continue;\n    const overlap = ew.filter(x => w.has(x)).length;\n    const ratio = overlap / Math.min(ew.length, w.size);\n    if (ratio > best) { best = ratio; dupOf = ex; }\n  }\n  seenThisRun.push(String(t.topic).toLowerCase());\n  const secondary = Array.isArray(t.secondary_keywords) ? t.secondary_keywords : [];\n  out.push({ json: {\n    topic: t.topic,\n    story_format: t.story_format || 'Quick tips',\n    primary_keyword: t.primary_keyword || '',\n    secondary_keywords: secondary,\n    goal: t.goal || 'Engagement',\n    why_now: t.why_now || '',\n    data_note: t.data_note || 'AI estimate - no live data used',\n    keywords: [t.primary_keyword, ...secondary].filter(Boolean).join(', '),\n    is_duplicate: best >= 0.6,\n    duplicate_of: dupOf,\n    duplicate_similarity: Math.round(best * 100)\n  }});\n}\nif (!out.length) throw new Error('No usable story ideas in the research output.');\nreturn out;"
+      },
+      "id": "31ee40ea-4899-46f7-9ffa-25d8abe12c4b",
+      "name": "Parse Story Ideas + Duplicate Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $json;\nconst cfg = $('Config').first().json;\n\nconst sys = 'You are a ruthless Instagram & Facebook Stories performance analyst. Return ONLY valid JSON, no markdown fences.';\n\nconst user = [\n  'Score ONE story idea for ' + cfg.brand_name + ' (' + cfg.niche + ') on ' + cfg.platforms + '.',\n  '',\n  'TOPIC: ' + src.topic,\n  'FORMAT: ' + src.story_format,\n  'GOAL: ' + src.goal,\n  'KEYWORDS: ' + src.keywords,\n  'WHY NOW: ' + src.why_now,\n  '',\n  'SCORING RULES (total 100):',\n  '1. Hook strength of frame 1 (stops the tap-forward) - max 15',\n  '2. Completion potential (people watch all frames) - max 15',\n  '3. Interaction potential (poll / quiz / question / slider taps) - max 15',\n  '4. DM / reply potential - max 10',\n  '5. Share-to-story / send-to-friend potential - max 10',\n  '6. Visual punch in vertical 9:16 - max 10',\n  '7. Brand relevance - max 10',\n  '8. Simplicity (works with <15 words per frame) - max 5',\n  '9. Timeliness / seasonality - max 5',\n  '10. Originality - max 5',\n  '',\n  'CLASSIFICATION: HIGH = 75-100, MEDIUM = 60-74, LOW = 0-59.',\n  '',\n  'HARD RULES:',\n  '- Never invent real reach, views, completion rates or follower numbers.',\n  '- Any numeric claim must be labelled \"(AI estimate)\".',\n  '- Be strict. Average ideas must land between 55 and 75.',\n  '',\n  'Return ONLY valid JSON:',\n  '{\"story_score\":0,\"opportunity\":\"HIGH|MEDIUM|LOW\",\"score_breakdown\":{\"hook\":0,\"completion\":0,\"interaction\":0,\"replies\":0,\"shares\":0,\"visual\":0,\"brand_relevance\":0,\"simplicity\":0,\"timeliness\":0,\"originality\":0},\"best_platform\":\"Instagram|Facebook|Both\",\"best_sticker\":\"poll|quiz|question|slider|link|countdown|none\",\"target_audience\":\"\",\"why_it_works\":\"\",\"main_risk\":\"\",\"data_note\":\"AI estimate - no live platform data used\"}'\n].join('\\n');\n\nreturn { json: { model: 'deepseek-v4-1-flash', stream: false, instructions: sys, input: [{ role: 'user', content: user }] } };"
+      },
+      "id": "0f3c5140-d869-486e-b3c3-b3801dd311aa",
+      "name": "Build Story Score Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/openai/v1/responses",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "f5bda3cd-8911-47e7-9a85-ae39219ebc44",
+      "name": "KIE Chat — Story Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        1712
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PDgaO63PjBvVRxtb",
+          "name": "KIE API"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractText(resp) {\n  if (!resp) return null;\n  if (typeof resp === 'string') return resp;\n  function fromOutput(obj) {\n    if (!obj || !Array.isArray(obj.output)) return null;\n    for (const item of obj.output) {\n      if (item && item.type === 'message' && Array.isArray(item.content)) {\n        for (const c of item.content) {\n          if (c && typeof c.text === 'string' && c.text.trim()) return c.text;\n        }\n      }\n    }\n    return null;\n  }\n  let t = fromOutput(resp);\n  if (t) return t;\n  if (resp.data) { t = fromOutput(resp.data); if (t) return t; }\n  if (resp.choices && resp.choices[0] && resp.choices[0].message) return resp.choices[0].message.content;\n  if (resp.data && resp.data.choices && resp.data.choices[0] && resp.data.choices[0].message) return resp.data.choices[0].message.content;\n  if (typeof resp.text === 'string') return resp.text;\n  if (typeof resp.content === 'string') return resp.content;\n  return null;\n}\nfunction extractJson(str) {\n  if (!str) return null;\n  try { return JSON.parse(str); } catch (e) {}\n  const cleaned = String(str).replace(/```json/gi, '').replace(/```/g, '').trim();\n  try { return JSON.parse(cleaned); } catch (e) {}\n  const a = cleaned.indexOf('{'), b = cleaned.lastIndexOf('}');\n  if (a !== -1 && b !== -1) { try { return JSON.parse(cleaned.slice(a, b + 1)); } catch (e) {} }\n  return null;\n}\n\nconst text = extractText($json);\nif (!text) throw new Error('No text in KIE response. Keys: ' + Object.keys($json).join(', '));\nconst parsed = extractJson(text);\nif (!parsed || typeof parsed.story_score === 'undefined') throw new Error('Bad score JSON: ' + text.slice(0, 400));\n\nconst src = $('Parse Story Ideas + Duplicate Check').item.json;\nconst cfg = $('Config').first().json;\n\nlet score = Math.max(0, Math.min(100, Math.round(Number(parsed.story_score) || 0)));\nlet opp = String(parsed.opportunity || '').toUpperCase().trim();\nif (['HIGH', 'MEDIUM', 'LOW'].indexOf(opp) === -1) opp = score >= 75 ? 'HIGH' : score >= 60 ? 'MEDIUM' : 'LOW';\nif (src.is_duplicate) opp = 'LOW';\n\nconst threshold = Number(cfg.min_story_score) || 60;\nconst meets = opp !== 'LOW' && score >= threshold && !src.is_duplicate;\n\nlet note;\nif (src.is_duplicate) note = 'Auto-rejected: ' + src.duplicate_similarity + '% similar to existing story \"' + src.duplicate_of + '\"';\nelse if (!meets) note = 'Auto-rejected: story score ' + score + '/100 is below ' + threshold;\nelse note = 'Auto-approved for story generation (' + opp + ', ' + score + '/100)';\n\nreturn { json: {\n  ...src,\n  story_score: score,\n  opportunity: opp,\n  score_breakdown: parsed.score_breakdown || {},\n  best_platform: parsed.best_platform || 'Both',\n  best_sticker: parsed.best_sticker || 'poll',\n  target_audience: parsed.target_audience || '',\n  why_it_works: parsed.why_it_works || '',\n  main_risk: parsed.main_risk || '',\n  meets_threshold: meets,\n  decision_note: note\n}};"
+      },
+      "id": "3dde4d8b-687b-4ab1-bed4-e72b2662af3e",
+      "name": "Parse Score + Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.meets_threshold }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7309fca0-212b-47ea-821a-8b909e8d05a1",
+      "name": "IF Story OK",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2112,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $json;\nconst cfg = $('Config').first().json;\nconst n = Number(cfg.frames_per_story) || 4;\n\nconst sys = 'You are a senior Stories copywriter and art director for ' + cfg.brand_name + ', a wellness travel brand. Return ONLY valid JSON, no markdown fences.';\n\nconst user = [\n  'Write a ' + n + '-frame vertical STORY sequence for ' + cfg.platforms + '. Organic brand awareness, NOT a sales pitch.',\n  '',\n  'TOPIC: ' + src.topic,\n  'FORMAT: ' + src.story_format,\n  'GOAL: ' + src.goal,\n  'KEYWORDS: ' + src.keywords,\n  'SCORE: ' + src.story_score + '/100 (' + src.opportunity + ')',\n  'TARGET AUDIENCE: ' + src.target_audience,\n  'SUGGESTED STICKER: ' + src.best_sticker,\n  'LINK FOR LAST FRAME: ' + (cfg.link_url || 'none'),\n  '',\n  'FRAME RULES:',\n  '- Exactly ' + n + ' frames.',\n  '- Frame 1 = HOOK: max 8 words on screen, creates curiosity, makes people stay.',\n  '- Middle frames = VALUE: one idea per frame, max 15 words on screen.',\n  '- Include exactly ONE interactive frame (poll / quiz / question / slider) with the exact sticker text and options.',\n  '- Last frame = soft CTA (send to a friend, reply, visit link, follow for more). NEVER \"buy now\".',\n  '- Sound human, warm and calm, never like an AI. Max 1 emoji per frame.',\n  '- Never invent statistics, prices, opening hours or fake facts.',\n  '- image_prompt: one photorealistic VERTICAL 9:16 wellness-travel scene per frame, same visual mood across all frames, subject in the lower two-thirds, calm uncluttered upper third. Do NOT describe any text in the image_prompt, no logos.',\n  '- alt_text: one plain sentence describing the image for accessibility.',\n  '- caption: optional 1-2 short lines (used by Facebook / Postiz as post text), 3-5 hashtags max.',\n  '',\n  'Return ONLY valid JSON:',\n  '{\"story_angle\":\"\",\"frames\":[{\"frame\":1,\"role\":\"Hook|Value|Interaction|CTA\",\"on_screen_text\":\"\",\"sticker_type\":\"none|poll|quiz|question|slider|link|countdown\",\"sticker_content\":\"\",\"image_prompt\":\"\",\"alt_text\":\"\"}],\"music_mood\":\"\",\"caption\":\"\",\"hashtags\":[\"#tag\"]}'\n].join('\\n');\n\nreturn { json: { model: 'deepseek-v4-1-flash', stream: false, instructions: sys, input: [{ role: 'user', content: user }] } };"
+      },
+      "id": "ec4a7f62-5067-4968-9f88-9c448d52f823",
+      "name": "Build Story Script Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/openai/v1/responses",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "420e1456-1f83-4ec3-8bc7-0aae34c329c6",
+      "name": "KIE Chat — Story Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2512,
+        1568
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PDgaO63PjBvVRxtb",
+          "name": "KIE API"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractText(resp) {\n  if (!resp) return null;\n  if (typeof resp === 'string') return resp;\n  function fromOutput(obj) {\n    if (!obj || !Array.isArray(obj.output)) return null;\n    for (const item of obj.output) {\n      if (item && item.type === 'message' && Array.isArray(item.content)) {\n        for (const c of item.content) {\n          if (c && typeof c.text === 'string' && c.text.trim()) return c.text;\n        }\n      }\n    }\n    return null;\n  }\n  let t = fromOutput(resp);\n  if (t) return t;\n  if (resp.data) { t = fromOutput(resp.data); if (t) return t; }\n  if (resp.choices && resp.choices[0] && resp.choices[0].message) return resp.choices[0].message.content;\n  if (resp.data && resp.data.choices && resp.data.choices[0] && resp.data.choices[0].message) return resp.data.choices[0].message.content;\n  if (typeof resp.text === 'string') return resp.text;\n  if (typeof resp.content === 'string') return resp.content;\n  return null;\n}\nfunction extractJson(str) {\n  if (!str) return null;\n  try { return JSON.parse(str); } catch (e) {}\n  const cleaned = String(str).replace(/```json/gi, '').replace(/```/g, '').trim();\n  try { return JSON.parse(cleaned); } catch (e) {}\n  const a = cleaned.indexOf('{'), b = cleaned.lastIndexOf('}');\n  if (a !== -1 && b !== -1) { try { return JSON.parse(cleaned.slice(a, b + 1)); } catch (e) {} }\n  return null;\n}\n\nconst text = extractText($json);\nif (!text) throw new Error('No text in KIE response. Keys: ' + Object.keys($json).join(', '));\nconst parsed = extractJson(text);\nif (!parsed || !Array.isArray(parsed.frames) || !parsed.frames.length) throw new Error('Bad story JSON: ' + text.slice(0, 400));\n\nconst src = $('Parse Score + Decision').item.json;\nconst d = new Date();\nconst stamp = d.toISOString().slice(0, 10).replace(/-/g, '');\nconst rand = Math.random().toString(36).slice(2, 6).toUpperCase();\n\nconst tags = Array.isArray(parsed.hashtags)\n  ? parsed.hashtags.map(h => String(h).trim()).filter(Boolean).map(s => s.startsWith('#') ? s : '#' + s.replace(/\\s+/g, ''))\n  : [];\n\nreturn { json: {\n  story_id: 'ST-' + stamp + '-' + rand,\n  date: d.toISOString().slice(0, 10),\n  topic: src.topic,\n  story_format: src.story_format,\n  keywords: src.keywords,\n  goal: src.goal,\n  story_score: src.story_score,\n  opportunity: src.opportunity,\n  best_platform: src.best_platform,\n  decision_note: src.decision_note,\n  story_angle: parsed.story_angle || '',\n  music_mood: parsed.music_mood || '',\n  caption: parsed.caption || '',\n  hashtags: tags.join(' '),\n  frames: parsed.frames\n}};"
+      },
+      "id": "8303ab79-2ea3-45f7-bc8c-805d5fd507f7",
+      "name": "Parse Story Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst renderText = cfg.render_text_on_image === true || String(cfg.render_text_on_image).toLowerCase() === 'true';\nconst STYLE = ', photorealistic, vertical 9:16 composition for Instagram and Facebook Stories, shot on 35mm, natural golden-hour light, soft depth of field, premium editorial travel photography, muted earthy and sage colour palette, no watermark, no logo, no people looking directly at camera, ultra detailed';\n\n// Publish time: tomorrow at posting_hour_utc, frames spaced a few minutes apart (keeps order in Postiz)\nconst base = new Date();\nbase.setUTCDate(base.getUTCDate() + 1);\nbase.setUTCHours(Number(cfg.posting_hour_utc) || 17, 0, 0, 0);\nconst gap = Number(cfg.minutes_between_frames) || 2;\n\nconst out = [];\nconst items = $input.all();\nitems.forEach((item, idx) => {\n  const s = item.json;\n  const frames = s.frames || [];\n  // Stagger each story set by 1 hour so stories don't overlap\n  const storyBase = new Date(base.getTime() + idx * 60 * 60 * 1000);\n  frames.forEach((f, i) => {\n    const num = i + 1;\n    const onScreen = String(f.on_screen_text || '').replace(/\"/g, \"'\").replace(/\\n/g, ' ').replace(/\\s+/g, ' ').trim();\n    let prompt = String(f.image_prompt || '').replace(/\\s+/g, ' ').trim();\n    if (prompt.length < 20) prompt = 'A serene vertical wellness travel scene about ' + s.topic;\n    prompt = prompt.replace(/[.\\s]+$/, '') + STYLE;\n    if (renderText && onScreen) {\n      prompt += '. In the calm upper third, overlay large, bold, clean modern sans-serif white text with a subtle soft shadow, perfectly spelled, reading exactly: \"' + onScreen + '\". No other text anywhere in the image.';\n    } else {\n      prompt += '. Keep the upper third as clean empty negative space for a text overlay. No text in the image.';\n    }\n    const sticker = String(f.sticker_type || 'none').toLowerCase();\n    const scheduled = new Date(storyBase.getTime() + i * gap * 60 * 1000).toISOString();\n    let notes = s.decision_note || '';\n    if (sticker !== 'none') notes = ('Add ' + sticker.toUpperCase() + ' sticker manually in-app if needed: ' + (f.sticker_content || (sticker === 'link' ? (cfg.link_url || '') : '')) + '. ' + notes).trim();\n\n    out.push({\n      json: {\n        story_id: s.story_id,\n        frame_id: s.story_id + '-F' + num,\n        frame_number: num,\n        total_frames: frames.length,\n        date: s.date,\n        topic: s.topic,\n        story_format: s.story_format,\n        keywords: s.keywords,\n        story_score: s.story_score,\n        opportunity: s.opportunity,\n        best_platform: s.best_platform,\n        story_angle: s.story_angle,\n        frame_role: f.role || (num === 1 ? 'Hook' : num === frames.length ? 'CTA' : 'Value'),\n        on_screen_text: onScreen,\n        sticker_type: sticker,\n        sticker_content: f.sticker_content || '',\n        link_url: (sticker === 'link' || num === frames.length) ? (cfg.link_url || '') : '',\n        alt_text: f.alt_text || '',\n        music_mood: s.music_mood,\n        caption: s.caption,\n        hashtags: s.hashtags,\n        image_prompt: prompt,\n        platforms: cfg.platforms,\n        postiz_post_type: cfg.postiz_post_type || 'story',\n        scheduled_at: scheduled,\n        human_notes: notes\n      },\n      pairedItem: { item: idx }\n    });\n  });\n});\nreturn out;"
+      },
+      "id": "76c5f5d7-1c71-4580-bcaa-96b20c522ed6",
+      "name": "Split Frames + Build 9:16 Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'nano-banana-2-lite', input: { prompt: $json.image_prompt, aspect_ratio: '9:16', output_format: 'png' } }) }}",
+        "options": {
+          "timeout": 30000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1500
+            }
+          }
+        }
+      },
+      "id": "5c6cce62-f02c-4480-af0e-0adfafe5e22f",
+      "name": "KIE.AI — Create 9:16 Image Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        1568
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9UjVmUoPYIJ6Rox9",
+          "name": "Nanobana"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "amount": 90
+      },
+      "id": "7a5af542-abf1-475a-bc23-2a5585dafc01",
+      "name": "Wait for Images",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3312,
+        1568
+      ],
+      "webhookId": "travelistguide-stories-wait-01"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.kie.ai/api/v1/jobs/recordInfo?taskId={{ $('KIE.AI — Create 9:16 Image Task').item.json.data.taskId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fc44b9b0-0ebe-432c-b277-9a5a45c1df27",
+      "name": "KIE.AI — Get Image Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3520,
+        1568
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9UjVmUoPYIJ6Rox9",
+          "name": "Nanobana"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const res = $json || {};\nconst src = $('Split Frames + Build 9:16 Prompts').item.json;\nconst createRes = $('KIE.AI — Create 9:16 Image Task').item.json || {};\nconst taskId = (createRes.data && createRes.data.taskId) ? createRes.data.taskId : '';\nconst state = (res.data && res.data.state) ? res.data.state : ((res.data && res.data.successFlag) ? 'success' : 'unknown');\n\nlet url = '';\nif (res.data && res.data.resultJson) {\n  try {\n    const r = typeof res.data.resultJson === 'string' ? JSON.parse(res.data.resultJson) : res.data.resultJson;\n    if (r && Array.isArray(r.resultUrls) && r.resultUrls.length) url = r.resultUrls[0];\n    else if (r && r.resultUrl) url = r.resultUrl;\n    else if (r && Array.isArray(r.urls) && r.urls.length) url = r.urls[0];\n  } catch (e) {}\n}\nif (!url && res.data && res.data.response && Array.isArray(res.data.response.resultUrls)) url = res.data.response.resultUrls[0] || '';\nif (!url && res.data && Array.isArray(res.data.resultUrls)) url = res.data.resultUrls[0] || '';\nif (!url && res.data && typeof res.data.imageUrl === 'string') url = res.data.imageUrl;\n\nlet note = src.human_notes || '';\nnote = url\n  ? ('Image generated. ' + note).trim()\n  : ('KIE image not ready (state: ' + state + ', task: ' + taskId + '). Increase Wait or re-fetch. ' + note).trim();\n\nreturn { json: { ...src, kie_image_url: url, kie_task_id: taskId, kie_state: state, human_notes: note } };"
+      },
+      "id": "4a1f90b3-f084-4407-82d7-ebce165a244e",
+      "name": "Extract Image URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk",
+          "mode": "list",
+          "cachedResultName": "test sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Stories pending",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Story_ID": "={{ $json.story_id }}",
+            "Frame_ID": "={{ $json.frame_id }}",
+            "Frame_Number": "={{ $json.frame_number }}",
+            "Total_Frames": "={{ $json.total_frames }}",
+            "Date": "={{ $json.date }}",
+            "Topic": "={{ $json.topic }}",
+            "Story_Format": "={{ $json.story_format }}",
+            "Keywords": "={{ $json.keywords }}",
+            "Story_Score": "={{ $json.story_score }}",
+            "Opportunity": "={{ $json.opportunity }}",
+            "Story_Angle": "={{ $json.story_angle }}",
+            "Frame_Role": "={{ $json.frame_role }}",
+            "On_Screen_Text": "={{ $json.on_screen_text }}",
+            "Sticker_Type": "={{ $json.sticker_type }}",
+            "Sticker_Content": "={{ $json.sticker_content }}",
+            "Link_URL": "={{ $json.link_url }}",
+            "Caption": "={{ $json.caption }}",
+            "Hashtags": "={{ $json.hashtags }}",
+            "Music_Mood": "={{ $json.music_mood }}",
+            "Alt_Text": "={{ $json.alt_text }}",
+            "Image_Prompt": "={{ $json.image_prompt }}",
+            "KIE_Image_URL": "={{ $json.kie_image_url }}",
+            "Platforms": "={{ $json.platforms }}",
+            "Postiz_Post_Type": "={{ $json.postiz_post_type }}",
+            "Scheduled_At": "={{ $json.scheduled_at }}",
+            "Status": "Pending",
+            "Human_Notes": "={{ $json.human_notes }}",
+            "Postiz_Post_ID": "",
+            "Published_URL": ""
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c9d7c64a-5103-48b3-bf26-cb4b99f996db",
+      "name": "Save Stories to Google Sheets (Pending)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3920,
+        1568
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk",
+          "mode": "list",
+          "cachedResultName": "test sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiIThoUXh-ib9Y3jDspRz0dK0OcbfPD_knK8eyhZrlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Stories rejected",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Story_ID": "=REJ-{{ $json.topic.slice(0,12).replace(/[^a-zA-Z0-9]/g,'') }}-{{ Date.now() }}",
+            "Frame_ID": "",
+            "Frame_Number": "",
+            "Total_Frames": "",
+            "Date": "={{ new Date().toISOString().slice(0,10) }}",
+            "Topic": "={{ $json.topic }}",
+            "Story_Format": "={{ $json.story_format }}",
+            "Keywords": "={{ $json.keywords }}",
+            "Story_Score": "={{ $json.story_score }}",
+            "Opportunity": "={{ $json.opportunity }}",
+            "Story_Angle": "",
+            "Frame_Role": "",
+            "On_Screen_Text": "",
+            "Sticker_Type": "",
+            "Sticker_Content": "",
+            "Link_URL": "",
+            "Caption": "",
+            "Hashtags": "",
+            "Music_Mood": "",
+            "Alt_Text": "",
+            "Image_Prompt": "",
+            "KIE_Image_URL": "",
+            "Platforms": "",
+            "Postiz_Post_Type": "",
+            "Scheduled_At": "",
+            "Status": "Rejected",
+            "Human_Notes": "={{ $json.decision_note }}",
+            "Postiz_Post_ID": "",
+            "Published_URL": ""
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "fe2fa106-6a1b-4461-a5be-7e90330dd316",
+      "name": "Log Rejected Story",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2320,
+        1984
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "usn7gxUPLAckDC0i",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Stories": {
+      "main": [
+        [
+          {
+            "node": "Merge Config + Existing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Config + Existing": {
+      "main": [
+        [
+          {
+            "node": "Build Story Research Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Story Research Body": {
+      "main": [
+        [
+          {
+            "node": "KIE Chat — Story Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE Chat — Story Research": {
+      "main": [
+        [
+          {
+            "node": "Parse Story Ideas + Duplicate Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Story Ideas + Duplicate Check": {
+      "main": [
+        [
+          {
+            "node": "Build Story Score Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Story Score Body": {
+      "main": [
+        [
+          {
+            "node": "KIE Chat — Story Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE Chat — Story Score": {
+      "main": [
+        [
+          {
+            "node": "Parse Score + Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Score + Decision": {
+      "main": [
+        [
+          {
+            "node": "IF Story OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Story OK": {
+      "main": [
+        [
+          {
+            "node": "Build Story Script Body",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Rejected Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Story Script Body": {
+      "main": [
+        [
+          {
+            "node": "KIE Chat — Story Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE Chat — Story Script": {
+      "main": [
+        [
+          {
+            "node": "Parse Story Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Story Script": {
+      "main": [
+        [
+          {
+            "node": "Split Frames + Build 9:16 Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Frames + Build 9:16 Prompts": {
+      "main": [
+        [
+          {
+            "node": "KIE.AI — Create 9:16 Image Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE.AI — Create 9:16 Image Task": {
+      "main": [
+        [
+          {
+            "node": "Wait for Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Images": {
+      "main": [
+        [
+          {
+            "node": "KIE.AI — Get Image Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIE.AI — Get Image Result": {
+      "main": [
+        [
+          {
+            "node": "Extract Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Image URL": {
+      "main": [
+        [
+          {
+            "node": "Save Stories to Google Sheets (Pending)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
