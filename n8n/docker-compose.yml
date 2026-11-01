@@ -14,6 +14,29 @@ services:
       - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
     volumes:
       - n8n_data:/home/node/.n8n
+      - shorts:/home/node/.n8n-files/shorts
       - ./music:/home/node/.n8n-files/music
+    depends_on:
+      - audiogen
+
+  # Free local text-to-audio (Stable Audio Open). n8n reaches it at http://audiogen:8000
+  audiogen:
+    build: ./audiogen
+    # NVIDIA GPU: build with --build-arg TORCH_INDEX=https://download.pytorch.org/whl/cu124
+    # and uncomment the deploy block below.
+    restart: unless-stopped
+    environment:
+      - HF_TOKEN=${HF_TOKEN}   # free token from huggingface.co (accept the model licence first)
+      - AUDIO_MODEL=${AUDIO_MODEL:-stabilityai/stable-audio-open-small}
+    volumes:
+      - shorts:/home/node/.n8n-files/shorts
+      - models:/models
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices: [{ driver: nvidia, count: 1, capabilities: [gpu] }]
+
 volumes:
   n8n_data:
+  shorts:
+  models:
