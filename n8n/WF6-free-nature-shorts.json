@@ -1,9 +1,9 @@
 {
-  "name": "WF6 FREE - Nature & Destination Shorts (Pexels + AI Sound + FFmpeg)",
+  "name": "WF6 FREE - Nature & Destination Shorts (Pixabay + AI Sound + FFmpeg + Postiz)",
   "nodes": [
     {
       "parameters": {
-        "content": "# 🛠️ SETUP — FREE Nature & Destination Shorts\n*No KIE.ai video/image credits. Real 4K stock footage + AI-generated sound that matches each scene + FFmpeg editing, all free.*\n\n### Free stack\n- **Footage:** Pexels Video API (free) + Pixabay API (free fallback). Real cinematic 1080p–4K clips, royalty-free, OK for monetized channels.\n- **Editing:** FFmpeg inside n8n (Execute Command): crop to 9:16, colour grade, sharpen, animated titles, cross-dissolves, music with -14 LUFS loudness, H.264 export.\n- **Sound (generated, free):** local **Stable Audio Open** service (audiogen container). Claude writes a sound prompt per scene (waterfall roar, waves, birds...) + one score prompt; the AI generates them and FFmpeg mixes ambience + score like Veo's native audio.\n- **Music fallback:** your own royalty-free tracks in a folder (used only if generation is off/failed).\n- **Hosting:** Google Drive (free) gives Blotato a public URL.\n- **Writing:** Claude via KIE (only ~1 cheap text call per video).\n\n### Steps\n1. **Self-hosted n8n with FFmpeg + audiogen** — `docker compose up -d --build` in the repo's n8n/ folder (see n8n/README.md). Installs FFmpeg + fonts, enables Execute Command (`NODES_EXCLUDE=[]`) and starts the free sound generator. Needs a free Hugging Face token (HF_TOKEN) after accepting the stable-audio-open-small licence. n8n Cloud cannot run this.\n2. **Pexels** key (pexels.com/api) → Header Auth credential **Pexels**: Name `Authorization`, Value `YOUR_KEY` (no \"Bearer\"). Select it on *Search Pexels* + *Search Pexels (alt)*.\n3. **Pixabay** key (pixabay.com/api/docs) → Query Auth credential **Pixabay**: Name `key`, Value `YOUR_KEY`. Select it on *Search Pixabay*.\n4. **Music fallback (optional)**: .mp3 files in ./music/calm|uplifting|epic|emotional — used only when music generation is off or fails.\n5. **Google Drive** OAuth credential on *Upload to Drive* + *Make Public*.\n6. Sheet columns: `Topic | Destination 1 | Destination 2 | Destination 3 | Destination 4 | Status | Video URL`.\n7. Blotato: Header Auth `blotato-api-key` on the 4 Blotato nodes + your account IDs.\n\nTweak look/length in **Build Render Script** (top of the code).",
+        "content": "# 🛠️ SETUP — FREE Nature & Destination Shorts\n*No KIE.ai video/image credits. Real 4K stock footage + AI-generated sound that matches each scene + FFmpeg editing, posted with Postiz.*\n\n### Free stack\n- **Footage:** Pixabay API (free, 3 searches per scene). Pexels is built in as an optional extra source (node disabled while the Pexels API is paused).\n- **Sound (generated, free):** local **Stable Audio Open** (audiogen container). Claude writes a sound prompt per scene + one score prompt.\n- **Editing:** FFmpeg inside n8n: 9:16 crop, grade, animated titles, cross-dissolves, -14 LUFS mix, H.264.\n- **Publishing:** Postiz public API: the MP4 is uploaded straight to Postiz (no Drive needed) and posted to Instagram Reels, TikTok and YouTube Shorts in one request.\n\n### Steps\n1. `docker compose up -d --build` in the repo's n8n/ folder (n8n + FFmpeg + audiogen). Needs HF_TOKEN in .env (accept the stable-audio-open-small licence on Hugging Face). n8n Cloud cannot run this.\n2. **Pixabay** key → Query Auth credential: Name `key`, Value `YOUR_KEY`. Select it on the 3 *Search Pixabay* nodes.\n3. **Postiz** API key (Postiz → Settings → Public API) → Header Auth credential: Name `Authorization`, Value `YOUR_KEY` (no \"Bearer\"). Select it on *Upload to Postiz*, *List Postiz Channels*, *Publish to Postiz*.\n4. Open **Settings** (first node): Postiz URL (cloud or self-hosted) and, optionally, which channel IDs to post to.\n5. Sheet columns: `Topic | Destination 1 | Destination 2 | Destination 3 | Destination 4 | Status | Video URL`.\n6. Optional: when Pexels is back, add a Header Auth credential (`Authorization` / key) and enable *Search Pexels*.\n\nTweak look/length in **Build Render Script**, sound in **Plan Audio**.",
         "height": 1124,
         "width": 720
       },
@@ -13,7 +13,7 @@
         10112,
         2032
       ],
-      "id": "516df2ad-bd0e-4963-92e5-f30363f9ec2e",
+      "id": "ed3d5940-3f0f-4e57-a63b-045721137022",
       "name": "Setup Guide"
     },
     {
@@ -29,12 +29,12 @@
         10864,
         2032
       ],
-      "id": "cfd73943-37db-48cd-b1e2-350e4acc67ba",
+      "id": "21214446-1cc1-48ee-abdb-0ca9571670b6",
       "name": "S1"
     },
     {
       "parameters": {
-        "content": "# 2) Free footage — Pexels + Pixabay",
+        "content": "# 2) Free footage — Pixabay (+ Pexels optional)",
         "height": 260,
         "width": 1460,
         "color": 5
@@ -45,7 +45,7 @@
         10864,
         2320
       ],
-      "id": "c89a4ef1-bdf4-436c-b8b9-ed596ff6ac78",
+      "id": "655af05e-db40-4335-ab57-b3dbd0d9b25c",
       "name": "S2"
     },
     {
@@ -61,12 +61,12 @@
         10864,
         2608
       ],
-      "id": "616f2077-a3ae-4cfe-a23a-ece04517d0b3",
+      "id": "ecab9c2d-ddea-4f88-807b-fe2af42f8c87",
       "name": "S3"
     },
     {
       "parameters": {
-        "content": "# 4) Host — Google Drive (free) + cleanup",
+        "content": "# 4) Publish — Postiz (Instagram, TikTok, YouTube)",
         "height": 260,
         "width": 1460,
         "color": 3
@@ -77,24 +77,8 @@
         10864,
         2896
       ],
-      "id": "22001b6b-28ce-4976-ba91-4bb47d3269d7",
+      "id": "9bd6cbed-d996-47d6-a108-c48ac6580404",
       "name": "S4"
-    },
-    {
-      "parameters": {
-        "content": "# 5) Publish — Awareness",
-        "height": 1124,
-        "width": 420,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        12352,
-        2032
-      ],
-      "id": "a6814a3c-677f-4584-b64e-55e4871b87d1",
-      "name": "S5"
     },
     {
       "parameters": {
@@ -107,11 +91,24 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
+        10720,
+        2128
+      ],
+      "id": "c1c6d6a2-536b-407d-b037-40414cec3ba2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================== YOUR SETTINGS ==================\n// Postiz public API base URL\n//   Postiz cloud:  https://api.postiz.com/public/v1\n//   Self-hosted:   https://YOUR-POSTIZ-DOMAIN/api/public/v1\nconst POSTIZ_URL = 'https://api.postiz.com/public/v1';\n\n// Which Postiz channels to post to. Leave a list EMPTY to post to every connected\n// channel of that platform, or paste channel IDs (run \"List Postiz Channels\" once to see them).\nconst INSTAGRAM_IDS = [];\nconst TIKTOK_IDS = [];\nconst YOUTUBE_IDS = [];\n\nconst POST_MODE = 'now';          // 'now' = publish immediately, 'draft' = review in Postiz first\nconst YOUTUBE_PRIVACY = 'public'; // public | unlisted | private\nconst TIKTOK_AI_LABEL = true;     // the sound is AI-generated -> label it (TikTok policy)\n// ===================================================\nreturn [{ json: {\n  postiz_url: POSTIZ_URL.replace(/\\/+$/, ''),\n  instagram_ids: INSTAGRAM_IDS, tiktok_ids: TIKTOK_IDS, youtube_ids: YOUTUBE_IDS,\n  post_mode: POST_MODE, youtube_privacy: YOUTUBE_PRIVACY, tiktok_ai_label: TIKTOK_AI_LABEL\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
         10912,
         2128
       ],
-      "id": "bede186b-3f76-48ff-8211-d9c94ca50bf9",
-      "name": "Schedule Trigger"
+      "id": "abe2b74d-08da-41bb-94cd-0133b87b3440",
+      "name": "Settings"
     },
     {
       "parameters": {
@@ -137,7 +134,7 @@
         11072,
         2128
       ],
-      "id": "d8ae2f4c-3c93-4faa-ac94-2b8a931830f0",
+      "id": "7b52ca0a-29ba-442d-b4d3-9947f8031e59",
       "name": "Get Story Rows",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -156,12 +153,12 @@
         11232,
         2128
       ],
-      "id": "46573d6e-0019-4542-a04f-473321bfa211",
+      "id": "d8cbb8c5-ff4a-4315-8c11-1380250bd0a1",
       "name": "Pick Next Row"
     },
     {
       "parameters": {
-        "jsCode": "const SYSTEM = \"You are the creative director and lead copywriter of a short-form nature & travel channel. Your job sits at the AWARENESS stage of the funnel: stop the scroll, spark wonder, and make a stranger feel something in the first second, then leave them wanting to go there.\\n\\nYou write with emotional storytelling, editorial restraint and premium copy. No cliches (\\\"hidden gem\\\", \\\"bucket list\\\", \\\"paradise on earth\\\"), no exclamation-mark hype, no emojis.\\n\\nIMPORTANT: the picture comes from REAL cinematic stock footage (Pexels and Pixabay), and the SOUND is generated by a text-to-audio AI from your prompts (like Veo's native audio). Your three jobs are (a) find the most cinematic footage with smart search queries, (b) write the words that sit on top of it, and (c) write sound prompts so every scene sounds exactly like what we see.\\n\\nYou will receive a TOPIC and exactly 4 DESTINATIONS. Build ONE ~26-second vertical short made of 4 consecutive ~7-second scenes, one per destination, in the given order, that together tell a single emotional arc:\\n- Scene 1 - HOOK: the most arresting, unexpected shot (dramatic aerial, huge waterfall, cliff edge, wildlife). Must work with sound off.\\n- Scene 2 - DISCOVERY: pull the viewer deeper; scale, texture or a surprising detail.\\n- Scene 3 - FEELING: intimate and human; a person walking, swimming, hiking or watching the view.\\n- Scene 4 - AFTERGLOW: the widest, calmest shot; sunset, golden hour or blue hour; a feeling of arrival.\\n\\nFor EACH scene write:\\n1. search_queries: exactly 3 English stock-video search queries, 2-4 words each, ordered from most specific to most generic.\\n   - Query 1 = place name + shot type (e.g. \\\"Moraine Lake aerial\\\").\\n   - Query 2 = the landscape and light WITHOUT the place name (e.g. \\\"turquoise mountain lake sunrise\\\").\\n   - Query 3 = a safe generic fallback that surely exists (e.g. \\\"mountain lake drone\\\").\\n   Stock libraries are tagged with simple concrete nouns: use words like waterfall, fjord, rice terraces, desert dunes, aerial, drone, sunset, fog, waves, forest, woman walking, hiker. Never use abstract words (breathtaking, magical, serene) in queries. Prefer subjects that read well vertically: waterfalls, cliffs, tall trees, people, top-down drone shots.\\n2. overlay: on-screen text for the scene, 2-6 words, poetic but concrete, sentence case, no hashtags, no emojis, no ending period. (Scene 1 shows the hook instead, but still write an overlay.)\\n3. label: the location label \\\"Place, Country\\\", max 32 characters.\\n4. sound_prompt: the natural ambient sound of THIS exact shot for a text-to-audio model, 10-25 words. Describe the concrete sound sources you would hear at that place and moment, from loudest to quietest, with texture and distance (e.g. \\\"powerful waterfall roaring close up, heavy mist spray, distant tropical birds calling, deep rumble\\\"). Match the footage you are searching for. Only real-world sounds: NO music, NO voices, NO speech.\\n\\nThen write the packaging:\\n- title: YouTube Shorts title, max 70 characters, curiosity-driven, names the place or the feeling.\\n- hook: the first line viewers read ON SCREEN over scene 1, max 8 words, an emotional or curiosity hook, no ending period.\\n- caption: 2-4 short lines for Instagram/TikTok. Line 1 = the hook. Then a sensory line, then a soft invitation (save it, share it with who you'd go with). No hard sell, no links.\\n- hashtags: 5-8 relevant hashtags, mixing broad (#travel #nature) and specific (place names).\\n- music_mood: exactly one of \\\"calm\\\", \\\"uplifting\\\", \\\"epic\\\", \\\"emotional\\\" - the background music that best fits the arc.\\n- music_prompt: ONE text-to-music prompt for a soft cinematic score that sits UNDER the natural sound for the whole video, 15-30 words: genre, lead instruments, mood, tempo in BPM, key/feel, production (e.g. \\\"emotional cinematic ambient, soft felt piano and warm string pads, slow 70 BPM, gentle swell, hopeful, airy reverb\\\"). Instrumental only, no vocals, no drums kit.\\n\\nReturn ONLY valid JSON, no markdown fences, no commentary, exactly this shape:\\n{\\n  \\\"title\\\": \\\"\\\",\\n  \\\"hook\\\": \\\"\\\",\\n  \\\"caption\\\": \\\"\\\",\\n  \\\"hashtags\\\": [\\\"#...\\\"],\\n  \\\"music_mood\\\": \\\"calm\\\",\\n  \\\"music_prompt\\\": \\\"\\\",\\n  \\\"scenes\\\": [\\n    {\\\"destination\\\": \\\"\\\", \\\"role\\\": \\\"hook|discovery|feeling|afterglow\\\", \\\"search_queries\\\": [\\\"\\\", \\\"\\\", \\\"\\\"], \\\"overlay\\\": \\\"\\\", \\\"label\\\": \\\"\\\", \\\"sound_prompt\\\": \\\"\\\"}\\n  ]\\n}\\n\\\"scenes\\\" must contain exactly 4 objects, in the order of the destinations given.\";\nconst { topic, destinations } = $input.first().json;\nconst user = `TOPIC: ${topic}\\nDESTINATIONS (in order):\\n${destinations.map((d, i) => `${i + 1}. ${d}`).join('\\n')}`;\nreturn [{ json: {\n  ...$input.first().json,\n  body: {\n    model: 'claude-opus-5-5',\n    max_tokens: 4096,\n    stream: false,\n    messages: [{ role: 'user', content: `${SYSTEM}\\n\\n---\\n\\n${user}` }]\n  }\n}}];"
+        "jsCode": "const SYSTEM = \"You are the creative director and lead copywriter of a short-form nature & travel channel. Your job sits at the AWARENESS stage of the funnel: stop the scroll, spark wonder, and make a stranger feel something in the first second, then leave them wanting to go there.\\n\\nYou write with emotional storytelling, editorial restraint and premium copy. No cliches (\\\"hidden gem\\\", \\\"bucket list\\\", \\\"paradise on earth\\\"), no exclamation-mark hype, no emojis.\\n\\nIMPORTANT: the picture comes from REAL cinematic stock footage (Pixabay), and the SOUND is generated by a text-to-audio AI from your prompts (like Veo's native audio). Your three jobs are (a) find the most cinematic footage with smart search queries, (b) write the words that sit on top of it, and (c) write sound prompts so every scene sounds exactly like what we see.\\n\\nYou will receive a TOPIC and exactly 4 DESTINATIONS. Build ONE ~26-second vertical short made of 4 consecutive ~7-second scenes, one per destination, in the given order, that together tell a single emotional arc:\\n- Scene 1 - HOOK: the most arresting, unexpected shot (dramatic aerial, huge waterfall, cliff edge, wildlife). Must work with sound off.\\n- Scene 2 - DISCOVERY: pull the viewer deeper; scale, texture or a surprising detail.\\n- Scene 3 - FEELING: intimate and human; a person walking, swimming, hiking or watching the view.\\n- Scene 4 - AFTERGLOW: the widest, calmest shot; sunset, golden hour or blue hour; a feeling of arrival.\\n\\nFor EACH scene write:\\n1. search_queries: exactly 3 English stock-video search queries, 2-4 words each, ordered from most specific to most generic.\\n   - Query 1 = place name + shot type (e.g. \\\"Moraine Lake aerial\\\").\\n   - Query 2 = the landscape and light WITHOUT the place name (e.g. \\\"turquoise mountain lake sunrise\\\").\\n   - Query 3 = a safe generic fallback that surely exists (e.g. \\\"mountain lake drone\\\").\\n   Stock libraries are tagged with simple concrete nouns: use words like waterfall, fjord, rice terraces, desert dunes, aerial, drone, sunset, fog, waves, forest, woman walking, hiker. Never use abstract words (breathtaking, magical, serene) in queries. Prefer subjects that read well vertically: waterfalls, cliffs, tall trees, people, top-down drone shots.\\n2. overlay: on-screen text for the scene, 2-6 words, poetic but concrete, sentence case, no hashtags, no emojis, no ending period. (Scene 1 shows the hook instead, but still write an overlay.)\\n3. label: the location label \\\"Place, Country\\\", max 32 characters.\\n4. sound_prompt: the natural ambient sound of THIS exact shot for a text-to-audio model, 10-25 words. Describe the concrete sound sources you would hear at that place and moment, from loudest to quietest, with texture and distance (e.g. \\\"powerful waterfall roaring close up, heavy mist spray, distant tropical birds calling, deep rumble\\\"). Match the footage you are searching for. Only real-world sounds: NO music, NO voices, NO speech.\\n\\nThen write the packaging:\\n- title: YouTube Shorts title, max 70 characters, curiosity-driven, names the place or the feeling.\\n- hook: the first line viewers read ON SCREEN over scene 1, max 8 words, an emotional or curiosity hook, no ending period.\\n- caption: 2-4 short lines for Instagram/TikTok. Line 1 = the hook. Then a sensory line, then a soft invitation (save it, share it with who you'd go with). No hard sell, no links.\\n- hashtags: 5-8 relevant hashtags, mixing broad (#travel #nature) and specific (place names).\\n- music_mood: exactly one of \\\"calm\\\", \\\"uplifting\\\", \\\"epic\\\", \\\"emotional\\\" - the background music that best fits the arc.\\n- music_prompt: ONE text-to-music prompt for a soft cinematic score that sits UNDER the natural sound for the whole video, 15-30 words: genre, lead instruments, mood, tempo in BPM, key/feel, production (e.g. \\\"emotional cinematic ambient, soft felt piano and warm string pads, slow 70 BPM, gentle swell, hopeful, airy reverb\\\"). Instrumental only, no vocals, no drums kit.\\n\\nReturn ONLY valid JSON, no markdown fences, no commentary, exactly this shape:\\n{\\n  \\\"title\\\": \\\"\\\",\\n  \\\"hook\\\": \\\"\\\",\\n  \\\"caption\\\": \\\"\\\",\\n  \\\"hashtags\\\": [\\\"#...\\\"],\\n  \\\"music_mood\\\": \\\"calm\\\",\\n  \\\"music_prompt\\\": \\\"\\\",\\n  \\\"scenes\\\": [\\n    {\\\"destination\\\": \\\"\\\", \\\"role\\\": \\\"hook|discovery|feeling|afterglow\\\", \\\"search_queries\\\": [\\\"\\\", \\\"\\\", \\\"\\\"], \\\"overlay\\\": \\\"\\\", \\\"label\\\": \\\"\\\", \\\"sound_prompt\\\": \\\"\\\"}\\n  ]\\n}\\n\\\"scenes\\\" must contain exactly 4 objects, in the order of the destinations given.\";\nconst { topic, destinations } = $input.first().json;\nconst user = `TOPIC: ${topic}\\nDESTINATIONS (in order):\\n${destinations.map((d, i) => `${i + 1}. ${d}`).join('\\n')}`;\nreturn [{ json: {\n  ...$input.first().json,\n  body: {\n    model: 'claude-opus-5-5',\n    max_tokens: 4096,\n    stream: false,\n    messages: [{ role: 'user', content: `${SYSTEM}\\n\\n---\\n\\n${user}` }]\n  }\n}}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -169,7 +166,7 @@
         11392,
         2128
       ],
-      "id": "88be0779-b2da-48c1-814c-43f4ef3e3dc4",
+      "id": "a4d5d08f-b717-4939-8540-8c95020fe6ef",
       "name": "Build Claude Request"
     },
     {
@@ -189,7 +186,7 @@
         11552,
         2128
       ],
-      "id": "f2c3686e-030e-4b29-a1e9-d53330469b6c",
+      "id": "704477a0-e956-450e-8c98-07b0218358d2",
       "name": "Claude Opus 5.5",
       "credentials": {
         "httpHeaderAuth": {
@@ -208,32 +205,36 @@
         11712,
         2128
       ],
-      "id": "3d463e52-ed48-48f2-af78-daca9673f473",
+      "id": "62672903-452c-4cf1-9bf4-1a5c30b71e94",
       "name": "Parse Prompts"
     },
     {
       "parameters": {
-        "url": "https://api.pexels.com/videos/search",
+        "url": "https://pixabay.com/api/videos/",
         "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "genericAuthType": "httpQueryAuth",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
-              "name": "query",
-              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[0] }}"
+              "name": "q",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[0].slice(0, 100) }}"
             },
             {
-              "name": "orientation",
-              "value": "portrait"
+              "name": "video_type",
+              "value": "film"
             },
             {
-              "name": "size",
-              "value": "medium"
+              "name": "min_height",
+              "value": "1080"
+            },
+            {
+              "name": "safesearch",
+              "value": "true"
             },
             {
               "name": "per_page",
-              "value": "15"
+              "value": "20"
             }
           ]
         },
@@ -245,32 +246,36 @@
         10912,
         2416
       ],
-      "id": "458531b7-b471-4f01-a0c1-0f428c0b08d5",
-      "name": "Search Pexels"
+      "id": "1217ffa9-cec7-4dc3-9a92-24d7d33a982c",
+      "name": "Search Pixabay"
     },
     {
       "parameters": {
-        "url": "https://api.pexels.com/videos/search",
+        "url": "https://pixabay.com/api/videos/",
         "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "genericAuthType": "httpQueryAuth",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
-              "name": "query",
-              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[1] }}"
+              "name": "q",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[1].slice(0, 100) }}"
             },
             {
-              "name": "orientation",
-              "value": "portrait"
+              "name": "video_type",
+              "value": "film"
             },
             {
-              "name": "size",
-              "value": "medium"
+              "name": "min_height",
+              "value": "1080"
+            },
+            {
+              "name": "safesearch",
+              "value": "true"
             },
             {
               "name": "per_page",
-              "value": "15"
+              "value": "20"
             }
           ]
         },
@@ -282,8 +287,8 @@
         11072,
         2416
       ],
-      "id": "e90caed2-284e-4245-ba59-e3b5486d13e7",
-      "name": "Search Pexels (alt)",
+      "id": "7c4b7d9f-c0df-44e1-91dd-a186e18ef54c",
+      "name": "Search Pixabay (alt)",
       "onError": "continueRegularOutput"
     },
     {
@@ -303,6 +308,10 @@
               "value": "film"
             },
             {
+              "name": "min_height",
+              "value": "1080"
+            },
+            {
               "name": "safesearch",
               "value": "true"
             },
@@ -320,21 +329,61 @@
         11232,
         2416
       ],
-      "id": "16ead54b-6e40-42d7-8e91-06cf6ec929e1",
-      "name": "Search Pixabay",
+      "id": "db96d8fd-4fa4-4855-bc83-f2c612e45bde",
+      "name": "Search Pixabay (generic)",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "// Pick the best free stock clip for every scene (Pexels first, Pixabay as fallback).\nconst CLIP_SECONDS = 7; // keep in sync with \"Build Render Script\"\nconst scenes = $('Parse Prompts').all().map(i => i.json);\nconst res = name => { try { return $(name).all().map(i => i.json); } catch (e) { return []; } };\nconst pexA = res('Search Pexels');\nconst pexB = res('Search Pexels (alt)');\nconst pix = res('Search Pixabay');\n\n// tier 1 = no quality loss after cropping to 1080x1920, tier 2 = usable (slight upscale)\nconst tierOf = (w, h) => {\n  const cropW = h > w ? w : Math.min(w, h * 9 / 16);\n  const cropH = h > w ? Math.min(h, w * 16 / 9) : h;\n  if (cropW >= 1080 && cropH >= 1900) return 1;\n  if (h >= 1080) return 2;\n  return 0;\n};\n\nconst fromPexels = (r, rank) => (r?.videos || []).flatMap((v, idx) => {\n  if ((v.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const files = (v.video_files || [])\n    .filter(f => f.link && String(f.file_type || '').includes('mp4') && f.width && f.height)\n    .map(f => ({ ...f, tier: tierOf(f.width, f.height) }))\n    .filter(f => f.tier > 0)\n    // best tier first, then the smallest file that is still good (fast download)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = files[0];\n  if (!f) return [];\n  return [{ id: `pexels-${v.id}`, url: f.link, width: f.width, height: f.height, duration: v.duration,\n    tier: f.tier, rank, idx, source: 'Pexels', credit: v.user?.name || 'Pexels', page: v.url }];\n});\n\nconst fromPixabay = (r, rank) => (r?.hits || []).flatMap((h, idx) => {\n  if ((h.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const opts = ['large', 'medium'].map(k => h.videos?.[k]).filter(v => v && v.url && v.width && v.height)\n    .map(v => ({ ...v, tier: tierOf(v.width, v.height) })).filter(v => v.tier > 0)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = opts[0];\n  if (!f) return [];\n  return [{ id: `pixabay-${h.id}`, url: f.url, width: f.width, height: f.height, duration: h.duration,\n    tier: f.tier, rank, idx, source: 'Pixabay', credit: h.user || 'Pixabay', page: h.pageURL }];\n});\n\nconst used = new Set();\nconst clips = scenes.map((s, i) => {\n  const candidates = [\n    ...fromPexels(pexA[i], 0),\n    ...fromPexels(pexB[i], 1),\n    ...fromPixabay(pix[i], 2)\n  ].filter(c => !used.has(c.id))\n   .sort((a, b) => a.tier - b.tier || a.rank - b.rank || a.idx - b.idx);\n  const c = candidates[0];\n  if (!c) throw new Error(`No usable stock clip for scene ${i + 1} (${s.destination}). Queries: ${s.search_queries.join(' | ')}. Add more generic queries or check your Pexels/Pixabay keys.`);\n  used.add(c.id);\n  // skip the first second (often a shaky start) when the clip is long enough\n  const start = c.duration >= CLIP_SECONDS + 2 ? 1 : 0;\n  return { scene: i + 1, destination: s.destination, label: s.label, overlay: s.overlay, sound_prompt: s.sound_prompt, role: s.role, start, ...c };\n});\n\nconst m = scenes[0];\nreturn [{ json: {\n  row_number: m.row_number, topic: m.topic, title: m.title, hook: m.hook, caption: m.caption,\n  music_mood: m.music_mood, music_prompt: m.music_prompt, clips,\n  credits: clips.map(c => `${c.source}: ${c.credit}`).join(', ')\n}}];"
+        "url": "https://api.pexels.com/videos/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('Parse Prompts').all()[$itemIndex].json.search_queries[0].slice(0, 100) }}"
+            },
+            {
+              "name": "orientation",
+              "value": "portrait"
+            },
+            {
+              "name": "size",
+              "value": "medium"
+            },
+            {
+              "name": "per_page",
+              "value": "15"
+            }
+          ]
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         11392,
         2416
       ],
-      "id": "585c2fd9-7378-4bd1-ac58-4beab62ae252",
+      "id": "0a40fa75-b611-4ec0-acbb-6346567089df",
+      "name": "Search Pexels",
+      "onError": "continueRegularOutput",
+      "disabled": true,
+      "notes": "Optional: enable when the Pexels API is available again (Header Auth: Authorization = your key)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pick the best free stock clip for every scene (Pixabay, 3 queries; Pexels if that node is enabled).\nconst CLIP_SECONDS = 7; // keep in sync with \"Build Render Script\"\nconst scenes = $('Parse Prompts').all().map(i => i.json);\nconst res = name => { try { return $(name).all().map(i => i.json); } catch (e) { return []; } };\nconst pixA = res('Search Pixabay');\nconst pixB = res('Search Pixabay (alt)');\nconst pixC = res('Search Pixabay (generic)');\nconst pex = res('Search Pexels'); // disabled node -> passes items through without \"videos\" -> ignored\n\n// tier 1 = no quality loss after cropping to 1080x1920, tier 2 = usable (slight upscale)\nconst tierOf = (w, h) => {\n  const cropW = h > w ? w : Math.min(w, h * 9 / 16);\n  const cropH = h > w ? Math.min(h, w * 16 / 9) : h;\n  if (cropW >= 1080 && cropH >= 1900) return 1;\n  if (h >= 1080) return 2;\n  return 0;\n};\n\nconst fromPexels = (r, rank) => (r?.videos || []).flatMap((v, idx) => {\n  if ((v.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const files = (v.video_files || [])\n    .filter(f => f.link && String(f.file_type || '').includes('mp4') && f.width && f.height)\n    .map(f => ({ ...f, tier: tierOf(f.width, f.height) }))\n    .filter(f => f.tier > 0)\n    // best tier first, then the smallest file that is still good (fast download)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = files[0];\n  if (!f) return [];\n  return [{ id: `pexels-${v.id}`, url: f.link, width: f.width, height: f.height, duration: v.duration,\n    tier: f.tier, rank, idx, source: 'Pexels', credit: v.user?.name || 'Pexels', page: v.url }];\n});\n\nconst fromPixabay = (r, rank) => (r?.hits || []).flatMap((h, idx) => {\n  if ((h.duration || 0) < CLIP_SECONDS + 0.5) return [];\n  const opts = ['large', 'medium'].map(k => h.videos?.[k]).filter(v => v && v.url && v.width && v.height)\n    .map(v => ({ ...v, tier: tierOf(v.width, v.height) })).filter(v => v.tier > 0)\n    .sort((a, b) => a.tier - b.tier || a.width * a.height - b.width * b.height);\n  const f = opts[0];\n  if (!f) return [];\n  return [{ id: `pixabay-${h.id}`, url: f.url, width: f.width, height: f.height, duration: h.duration,\n    tier: f.tier, rank, idx, source: 'Pixabay', credit: h.user || 'Pixabay', page: h.pageURL }];\n});\n\nconst used = new Set();\nconst clips = scenes.map((s, i) => {\n  const candidates = [\n    ...fromPixabay(pixA[i], 0),\n    ...fromPexels(pex[i], 1),\n    ...fromPixabay(pixB[i], 2),\n    ...fromPixabay(pixC[i], 3)\n  ].filter(c => !used.has(c.id))\n   .sort((a, b) => a.tier - b.tier || a.rank - b.rank || a.idx - b.idx);\n  const c = candidates[0];\n  if (!c) throw new Error(`No usable stock clip for scene ${i + 1} (${s.destination}). Queries: ${s.search_queries.join(' | ')}. Add more generic queries or check your Pixabay key.`);\n  used.add(c.id);\n  // skip the first second (often a shaky start) when the clip is long enough\n  const start = c.duration >= CLIP_SECONDS + 2 ? 1 : 0;\n  return { scene: i + 1, destination: s.destination, label: s.label, overlay: s.overlay, sound_prompt: s.sound_prompt, role: s.role, start, ...c };\n});\n\nconst m = scenes[0];\nreturn [{ json: {\n  row_number: m.row_number, topic: m.topic, title: m.title, hook: m.hook, caption: m.caption,\n  music_mood: m.music_mood, music_prompt: m.music_prompt, clips,\n  credits: clips.map(c => `${c.source}: ${c.credit}`).join(', ')\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11552,
+        2416
+      ],
+      "id": "ff00afed-0f12-43e2-8c8d-2542e996abd5",
       "name": "Pick Clips"
     },
     {
@@ -347,7 +396,7 @@
         10912,
         2704
       ],
-      "id": "7b4af736-bb2a-41a2-8f0a-ec7155bfd179",
+      "id": "73759e83-562e-46d4-bd8c-adde396b35b1",
       "name": "Plan Audio"
     },
     {
@@ -373,13 +422,13 @@
         11072,
         2704
       ],
-      "id": "02beb358-e6c6-43b5-96d3-22af307f9cbb",
+      "id": "ed42245d-07f3-4634-9a9b-553ac085fbbe",
       "name": "Generate Sound (local AI)",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "// ================== EDIT HERE ==================\nconst MUSIC_DIR = '/home/node/.n8n-files/music';    // fallback tracks if music generation is off/failed (subfolders: calm, uplifting, epic, emotional)\nconst FONT = '/usr/share/fonts/custom/Poppins-SemiBold.ttf';\nconst FONT_FALLBACK = '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf';\nconst CLIP_SECONDS = 7;     // length of each scene (keep in sync with \"Pick Clips\" and \"Plan Audio\")\nconst FADE = 0.6;           // cross-dissolve length between scenes\nconst TRANSITION = 'fade';  // any ffmpeg xfade transition: fade, smoothup, smoothleft, fadeblack, circleopen...\nconst VW = 1080, VH = 1920, FPS = 30;\nconst AMBIENCE_VOLUME = 0.85; // generated natural sound of each scene\nconst MUSIC_VOLUME = 0.45;    // generated score underneath (Veo-style mix: sound first, music as a bed)\nconst LOOP_XFADE = 1.5;       // crossfade used to loop a short generated music cue smoothly\n// ===============================================\n\nconst d = $('Pick Clips').first().json;\nconst plan = $('Plan Audio').first().json;           // job folder + music settings\nconst gen = $input.all().map(i => i.json);           // results of \"Generate Sound (local AI)\"\nconst clips = d.clips;\nconst N = clips.length;\nconst D = CLIP_SECONDS;\nconst TOTAL = +(N * D - (N - 1) * FADE).toFixed(2);\nconst job = plan.job;\nconst dir = plan.job_dir;\nconst genOk = gen.filter(g => g.path && !g.error).length;\n\nconst b64 = s => (typeof Buffer !== 'undefined')\n  ? Buffer.from(s, 'utf8').toString('base64')\n  : btoa(unescape(encodeURIComponent(s)));\nconst f2 = n => (+n).toFixed(2);\n// Keep letters (all languages), numbers, punctuation, spaces. Drops emojis the font can't draw.\nconst clean = s => String(s || '').replace(/[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Zs}]/gu, '').replace(/\\s+/g, ' ').trim();\nconst wrap = (s, max, maxLines = 3) => {\n  const lines = [];\n  let cur = '';\n  for (const w of clean(s).split(' ').filter(Boolean)) {\n    if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; }\n    else cur = cur ? cur + ' ' + w : w;\n  }\n  if (cur) lines.push(cur);\n  return lines.slice(0, maxLines);\n};\nconst shq = s => String(s).replace(/'/g, '%27'); // URLs go inside single quotes\n\n// Opacity envelope: fade in at a, fade out ending at e (per-clip time).\nconst alpha = (a, e, fin, fout) => {\n  const inPart = fin > 0 ? `if(lt(t,${f2(a)}),0,if(lt(t,${f2(a + fin)}),(t-${f2(a)})/${f2(fin)},` : '';\n  const close = fin > 0 ? '))' : '';\n  return `'${inPart}if(lt(t,${f2(e - fout)}),1,if(lt(t,${f2(e)}),(${f2(e)}-t)/${f2(fout)},0))${close}'`;\n};\n\nconst textFiles = [];\nconst drawtext = (text, size, y, alphaExpr) => {\n  const name = `t${textFiles.length}.txt`;\n  textFiles.push(`echo '${b64(text)}' | base64 -d > ${name}`);\n  return `drawtext=fontfile=$FONT:textfile=${name}:expansion=none:fontsize=${size}:fontcolor=white` +\n    `:shadowcolor=black@0.55:shadowx=0:shadowy=4:borderw=1:bordercolor=black@0.25` +\n    `:x=(w-text_w)/2:y=${y}:alpha=${alphaExpr}`;\n};\n\nconst clipCmds = clips.map((c, i) => {\n  const isFirst = i === 0, isLast = i === N - 1;\n  const end = isLast ? D - 0.35 : D - FADE;\n  const texts = [];\n\n  // Top text: hook on scene 1 (visible from frame 1 for sound-off viewers), overlay line on the others.\n  const top = isFirst ? wrap(d.hook, 22, 4) : wrap(c.overlay, 24, 3);\n  const size = isFirst ? 78 : 64;\n  const lh = Math.round(size * 1.28);\n  const topAlpha = isFirst ? alpha(0, end, 0, 0.4) : alpha(0.45, end, 0.5, 0.4);\n  top.forEach((line, j) => texts.push(drawtext(line, size, 300 + j * lh, topAlpha)));\n\n  // Location label above the platform UI safe zone.\n  const label = clean(c.label || c.destination).toUpperCase().slice(0, 34);\n  if (label) texts.push(drawtext(label, 40, 1360, alpha(0.8, end, 0.5, 0.4)));\n\n  const vf = [\n    `scale=${VW}:${VH}:force_original_aspect_ratio=increase:flags=lanczos`,\n    `crop=${VW}:${VH}`,\n    `fps=${FPS}`,\n    'setsar=1',\n    'eq=contrast=1.05:saturation=1.12',\n    'unsharp=5:5:0.35:5:5:0',\n    'vignette=angle=0.35',\n    ...texts,\n    'format=yuv420p'\n  ].join(',');\n\n  return `dl '${shq(c.url)}' src${i}.mp4\\n` +\n    `ffmpeg -hide_banner -loglevel error -y -ss ${f2(c.start || 0)} -i src${i}.mp4 -t ${D} -an -vf \"${vf}\" ` +\n    `-r ${FPS} -c:v libx264 -preset veryfast -crf 16 -pix_fmt yuv420p c${i}.mp4 && rm -f src${i}.mp4`;\n});\n\n// Stitch: cross-dissolves between scenes + fade-out at the end.\nconst inputs = clips.map((_, i) => `-i c${i}.mp4`).join(' ');\nlet fc = clips.map((_, i) => `[${i}:v]settb=AVTB,setpts=PTS-STARTPTS[s${i}]`).join(';');\nlet prev = 's0';\nfor (let i = 1; i < N; i++) {\n  const out = i === N - 1 ? 'xl' : `x${i}`;\n  fc += `;[${prev}][s${i}]xfade=transition=${TRANSITION}:duration=${FADE}:offset=${f2(i * (D - FADE))}[${out}]`;\n  prev = out;\n}\nif (N === 1) fc += ';[s0]null[xl]';\nfc += `;[xl]fade=t=out:st=${f2(TOTAL - 0.5)}:d=0.5[vout]`;\n\n// Audio graph: scene ambiences cross-faded exactly like the video, music bed underneath, -14 LUFS master.\nconst AF = 'aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo';\nconst ambInputs = clips.map((_, i) => `-i amb${i}.wav`).join(' ');\nclips.forEach((_, i) => { fc += `;[${N + i}:a]${AF},apad,atrim=0:${D},asetpts=PTS-STARTPTS[a${i}]`; });\nlet aprev = 'a0';\nfor (let i = 1; i < N; i++) {\n  fc += `;[${aprev}][a${i}]acrossfade=d=${FADE}:c1=tri:c2=tri[ax${i}]`;\n  aprev = `ax${i}`;\n}\nfc += `;[${aprev}]volume=${AMBIENCE_VOLUME}[amb];[${2 * N}:a]${AF},volume=${MUSIC_VOLUME}[mus]` +\n  `;[amb][mus]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,${AF}` +\n  `,afade=t=in:st=0:d=0.15,afade=t=out:st=${f2(TOTAL - 1.5)}:d=1.5,atrim=0:${TOTAL}[aout]`;\n\n// Smooth loop of the (short) generated music cue: k copies chained with crossfades, trimmed to the video length.\nconst L = Math.max(LOOP_XFADE + 1, Number(plan.music_seconds) || 11);\nconst k = Math.max(2, Math.ceil((TOTAL - LOOP_XFADE) / (L - LOOP_XFADE)) + 1);\nlet musicLoop = `[0:a]${AF},asplit=${k}${Array.from({ length: k }, (_, i) => `[m${i}]`).join('')}`;\nlet mprev = 'm0';\nfor (let i = 1; i < k; i++) { musicLoop += `;[${mprev}][m${i}]acrossfade=d=${LOOP_XFADE}[ml${i}]`; mprev = `ml${i}`; }\nmusicLoop += `;[${mprev}]atrim=0:${TOTAL},asetpts=PTS-STARTPTS[m]`;\n\nconst mood = ['calm', 'uplifting', 'epic', 'emotional'].includes(d.music_mood) ? d.music_mood : 'calm';\nconst AUDIO_EXT = `\\\\( -iname '*.mp3' -o -iname '*.m4a' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.flac' \\\\)`;\n\nconst script = `#!/bin/sh\nset -e\nDIR='${dir}'\nmkdir -p \"$DIR\" && cd \"$DIR\"\nFONT='${FONT}'\n[ -f \"$FONT\" ] || FONT='${FONT_FALLBACK}'\n${textFiles.join('\\n')}\n# download helper (uses the Node.js that ships with n8n, no curl/wget needed)\ndl() { node -e 'const [u,f]=process.argv.slice(1);const fs=require(\"fs\");const {Readable}=require(\"stream\");const {pipeline}=require(\"stream/promises\");fetch(u,{headers:{\"User-Agent\":\"Mozilla/5.0\"}}).then(r=>{if(!r.ok)throw new Error(\"HTTP \"+r.status+\" \"+u);return pipeline(Readable.fromWeb(r.body),fs.createWriteStream(f))}).catch(e=>{console.error(e.message);process.exit(1)})' \"$1\" \"$2\"; }\n\n# 1) Download, trim, crop to 9:16, grade and title each clip\n${clipCmds.join('\\n')}\n\n# 2) Sound design\n# 2a) Generated ambience per scene (missing/failed -> silence for that scene)\nfor i in ${clips.map((_, i) => i).join(' ')}; do\n  [ -s \"amb$i.wav\" ] || ffmpeg -hide_banner -loglevel error -y -f lavfi -i anullsrc=r=48000:cl=stereo -t ${D} \"amb$i.wav\"\ndone\n# 2b) Music bed: generated score (looped smoothly to full length), else a folder track, else silence\nMUSIC=\"\"\nif [ -s music_gen.wav ]; then\n  MUSIC=generated\n  ffmpeg -hide_banner -loglevel error -y -i music_gen.wav -filter_complex \"${musicLoop}\" -map \"[m]\" -ar 48000 -ac 2 music.wav\nelse\n  pick_music() { find \"$1\" -maxdepth \"$2\" -type f ${AUDIO_EXT} 2>/dev/null | awk 'BEGIN{srand()}{a[NR]=$0}END{if(NR)print a[int(rand()*NR)+1]}'; }\n  MUSIC=$(pick_music '${MUSIC_DIR}/${mood}' 1)\n  [ -n \"$MUSIC\" ] || MUSIC=$(pick_music '${MUSIC_DIR}' 2)\n  if [ -n \"$MUSIC\" ]; then\n    ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i \"$MUSIC\" -t ${TOTAL} -ar 48000 -ac 2 music.wav\n  else\n    ffmpeg -hide_banner -loglevel error -y -f lavfi -i anullsrc=r=48000:cl=stereo -t ${TOTAL} music.wav\n  fi\nfi\n\n# 3) Stitch with cross-dissolves and export (H.264 High, 1080x1920, 30fps, AAC)\nffmpeg -hide_banner -loglevel error -y ${inputs} ${ambInputs} -i music.wav -filter_complex \"${fc}\" -map \"[vout]\" -map \"[aout]\" -c:v libx264 -preset slow -crf 18 -profile:v high -pix_fmt yuv420p -r ${FPS} -g ${FPS * 2} -c:a aac -b:a 192k -ar 48000 -movflags +faststart -t ${TOTAL} final.mp4\n[ -s final.mp4 ]\necho \"MUSIC=\\${MUSIC:-none} SOUNDS_GENERATED=${genOk}/${gen.length}\"\necho \"$DIR/final.mp4\"\n`;\n\nconst slug = clean(d.title || 'short').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60) || 'short';\nreturn [{ json: {\n  ...d,\n  job: job,\n  job_dir: dir,\n  sound: gen.map(g => g.error ? `failed: ${String(g.error.message || g.error).slice(0, 120)}` : `${g.path} (${g.took}s)`),\n  output_path: `${dir}/final.mp4`,\n  file_name: `${slug}-${job}.mp4`,\n  duration: TOTAL,\n  command: `mkdir -p '${dir}' && echo '${b64(script)}' | base64 -d > '${dir}/render.sh' && sh '${dir}/render.sh'`\n}}];"
+        "jsCode": "// ================== EDIT HERE ==================\nconst MUSIC_DIR = '/home/node/.n8n-files/music';    // fallback tracks if music generation is off/failed (subfolders: calm, uplifting, epic, emotional)\nconst FONT = '/usr/share/fonts/custom/Poppins-SemiBold.ttf';\nconst FONT_FALLBACK = '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf';\nconst CLIP_SECONDS = 7;     // length of each scene (keep in sync with \"Pick Clips\" and \"Plan Audio\")\nconst FADE = 0.6;           // cross-dissolve length between scenes\nconst TRANSITION = 'fade';  // any ffmpeg xfade transition: fade, smoothup, smoothleft, fadeblack, circleopen...\nconst VW = 1080, VH = 1920, FPS = 30;\nconst AMBIENCE_VOLUME = 0.85; // generated natural sound of each scene\nconst MUSIC_VOLUME = 0.45;    // generated score underneath (Veo-style mix: sound first, music as a bed)\nconst LOOP_XFADE = 1.5;       // crossfade used to loop a short generated music cue smoothly\n// ===============================================\n\nconst d = $('Pick Clips').first().json;\nconst plan = $('Plan Audio').first().json;           // job folder + music settings\nconst gen = $input.all().map(i => i.json);           // results of \"Generate Sound (local AI)\"\nconst clips = d.clips;\nconst N = clips.length;\nconst D = CLIP_SECONDS;\nconst TOTAL = +(N * D - (N - 1) * FADE).toFixed(2);\nconst job = plan.job;\nconst dir = plan.job_dir;\nconst genOk = gen.filter(g => g.path && !g.error).length;\n\nconst b64 = s => (typeof Buffer !== 'undefined')\n  ? Buffer.from(s, 'utf8').toString('base64')\n  : btoa(unescape(encodeURIComponent(s)));\nconst f2 = n => (+n).toFixed(2);\n// Keep letters (all languages), numbers, punctuation, spaces. Drops emojis the font can't draw.\nconst clean = s => String(s || '').replace(/[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Zs}]/gu, '').replace(/\\s+/g, ' ').trim();\nconst wrap = (s, max, maxLines = 3) => {\n  const lines = [];\n  let cur = '';\n  for (const w of clean(s).split(' ').filter(Boolean)) {\n    if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; }\n    else cur = cur ? cur + ' ' + w : w;\n  }\n  if (cur) lines.push(cur);\n  return lines.slice(0, maxLines);\n};\nconst shq = s => String(s).replace(/'/g, '%27'); // URLs go inside single quotes\n\n// Opacity envelope: fade in at a, fade out ending at e (per-clip time).\nconst alpha = (a, e, fin, fout) => {\n  const inPart = fin > 0 ? `if(lt(t,${f2(a)}),0,if(lt(t,${f2(a + fin)}),(t-${f2(a)})/${f2(fin)},` : '';\n  const close = fin > 0 ? '))' : '';\n  return `'${inPart}if(lt(t,${f2(e - fout)}),1,if(lt(t,${f2(e)}),(${f2(e)}-t)/${f2(fout)},0))${close}'`;\n};\n\nconst textFiles = [];\nconst drawtext = (text, size, y, alphaExpr) => {\n  const name = `t${textFiles.length}.txt`;\n  textFiles.push(`echo '${b64(text)}' | base64 -d > ${name}`);\n  return `drawtext=fontfile=$FONT:textfile=${name}:expansion=none:fontsize=${size}:fontcolor=white` +\n    `:shadowcolor=black@0.55:shadowx=0:shadowy=4:borderw=1:bordercolor=black@0.25` +\n    `:x=(w-text_w)/2:y=${y}:alpha=${alphaExpr}`;\n};\n\nconst clipCmds = clips.map((c, i) => {\n  const isFirst = i === 0, isLast = i === N - 1;\n  const end = isLast ? D - 0.35 : D - FADE;\n  const texts = [];\n\n  // Top text: hook on scene 1 (visible from frame 1 for sound-off viewers), overlay line on the others.\n  const top = isFirst ? wrap(d.hook, 22, 4) : wrap(c.overlay, 24, 3);\n  const size = isFirst ? 78 : 64;\n  const lh = Math.round(size * 1.28);\n  const topAlpha = isFirst ? alpha(0, end, 0, 0.4) : alpha(0.45, end, 0.5, 0.4);\n  top.forEach((line, j) => texts.push(drawtext(line, size, 300 + j * lh, topAlpha)));\n\n  // Location label above the platform UI safe zone.\n  const label = clean(c.label || c.destination).toUpperCase().slice(0, 34);\n  if (label) texts.push(drawtext(label, 40, 1360, alpha(0.8, end, 0.5, 0.4)));\n\n  const vf = [\n    `scale=${VW}:${VH}:force_original_aspect_ratio=increase:flags=lanczos`,\n    `crop=${VW}:${VH}`,\n    `fps=${FPS}`,\n    'setsar=1',\n    'eq=contrast=1.05:saturation=1.12',\n    'unsharp=5:5:0.35:5:5:0',\n    'vignette=angle=0.35',\n    ...texts,\n    'format=yuv420p'\n  ].join(',');\n\n  return `dl '${shq(c.url)}' src${i}.mp4\\n` +\n    `ffmpeg -hide_banner -loglevel error -y -ss ${f2(c.start || 0)} -i src${i}.mp4 -t ${D} -an -vf \"${vf}\" ` +\n    `-r ${FPS} -c:v libx264 -preset veryfast -crf 16 -pix_fmt yuv420p c${i}.mp4 && rm -f src${i}.mp4`;\n});\n\n// Stitch: cross-dissolves between scenes + fade-out at the end.\nconst inputs = clips.map((_, i) => `-i c${i}.mp4`).join(' ');\nlet fc = clips.map((_, i) => `[${i}:v]settb=AVTB,setpts=PTS-STARTPTS[s${i}]`).join(';');\nlet prev = 's0';\nfor (let i = 1; i < N; i++) {\n  const out = i === N - 1 ? 'xl' : `x${i}`;\n  fc += `;[${prev}][s${i}]xfade=transition=${TRANSITION}:duration=${FADE}:offset=${f2(i * (D - FADE))}[${out}]`;\n  prev = out;\n}\nif (N === 1) fc += ';[s0]null[xl]';\nfc += `;[xl]fade=t=out:st=${f2(TOTAL - 0.5)}:d=0.5[vout]`;\n\n// Audio graph: scene ambiences cross-faded exactly like the video, music bed underneath, -14 LUFS master.\nconst AF = 'aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo';\nconst ambInputs = clips.map((_, i) => `-i amb${i}.wav`).join(' ');\nclips.forEach((_, i) => { fc += `;[${N + i}:a]${AF},apad,atrim=0:${D},asetpts=PTS-STARTPTS[a${i}]`; });\nlet aprev = 'a0';\nfor (let i = 1; i < N; i++) {\n  fc += `;[${aprev}][a${i}]acrossfade=d=${FADE}:c1=tri:c2=tri[ax${i}]`;\n  aprev = `ax${i}`;\n}\nfc += `;[${aprev}]volume=${AMBIENCE_VOLUME}[amb];[${2 * N}:a]${AF},volume=${MUSIC_VOLUME}[mus]` +\n  `;[amb][mus]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11,${AF}` +\n  `,afade=t=in:st=0:d=0.15,afade=t=out:st=${f2(TOTAL - 1.5)}:d=1.5,atrim=0:${TOTAL}[aout]`;\n\n// Smooth loop of the (short) generated music cue: k copies chained with crossfades, trimmed to the video length.\nconst L = Math.max(LOOP_XFADE + 1, Number(plan.music_seconds) || 11);\nconst k = Math.max(2, Math.ceil((TOTAL - LOOP_XFADE) / (L - LOOP_XFADE)) + 1);\nconst musicInputs = Array.from({ length: k }, () => '-i music_gen.wav').join(' ');\nlet musicLoop = Array.from({ length: k }, (_, i) => `[${i}:a]${AF}[m${i}]`).join(';');\nlet mprev = 'm0';\nfor (let i = 1; i < k; i++) { musicLoop += `;[${mprev}][m${i}]acrossfade=d=${LOOP_XFADE}[ml${i}]`; mprev = `ml${i}`; }\nmusicLoop += `;[${mprev}]atrim=0:${TOTAL},asetpts=PTS-STARTPTS[m]`;\n\nconst mood = ['calm', 'uplifting', 'epic', 'emotional'].includes(d.music_mood) ? d.music_mood : 'calm';\nconst AUDIO_EXT = `\\\\( -iname '*.mp3' -o -iname '*.m4a' -o -iname '*.wav' -o -iname '*.aac' -o -iname '*.ogg' -o -iname '*.flac' \\\\)`;\n\nconst script = `#!/bin/sh\nset -e\nDIR='${dir}'\nmkdir -p \"$DIR\" && cd \"$DIR\"\nFONT='${FONT}'\n[ -f \"$FONT\" ] || FONT='${FONT_FALLBACK}'\n${textFiles.join('\\n')}\n# download helper (uses the Node.js that ships with n8n, no curl/wget needed)\ndl() { node -e 'const [u,f]=process.argv.slice(1);const fs=require(\"fs\");const {Readable}=require(\"stream\");const {pipeline}=require(\"stream/promises\");fetch(u,{headers:{\"User-Agent\":\"Mozilla/5.0\"}}).then(r=>{if(!r.ok)throw new Error(\"HTTP \"+r.status+\" \"+u);return pipeline(Readable.fromWeb(r.body),fs.createWriteStream(f))}).catch(e=>{console.error(e.message);process.exit(1)})' \"$1\" \"$2\"; }\n\n# 1) Download, trim, crop to 9:16, grade and title each clip\n${clipCmds.join('\\n')}\n\n# 2) Sound design\n# 2a) Generated ambience per scene (missing/failed -> silence for that scene)\nfor i in ${clips.map((_, i) => i).join(' ')}; do\n  [ -s \"amb$i.wav\" ] || ffmpeg -hide_banner -loglevel error -y -f lavfi -i anullsrc=r=48000:cl=stereo -t ${D} \"amb$i.wav\"\ndone\n# 2b) Music bed: generated score (looped smoothly to full length), else a folder track, else silence\nMUSIC=\"\"\nif [ -s music_gen.wav ]; then\n  MUSIC=generated\n  ffmpeg -hide_banner -loglevel error -y ${musicInputs} -filter_complex \"${musicLoop}\" -map \"[m]\" -ar 48000 -ac 2 music.wav\nelse\n  pick_music() { find \"$1\" -maxdepth \"$2\" -type f ${AUDIO_EXT} 2>/dev/null | awk 'BEGIN{srand()}{a[NR]=$0}END{if(NR)print a[int(rand()*NR)+1]}'; }\n  MUSIC=$(pick_music '${MUSIC_DIR}/${mood}' 1)\n  [ -n \"$MUSIC\" ] || MUSIC=$(pick_music '${MUSIC_DIR}' 2)\n  if [ -n \"$MUSIC\" ]; then\n    ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i \"$MUSIC\" -t ${TOTAL} -ar 48000 -ac 2 music.wav\n  else\n    ffmpeg -hide_banner -loglevel error -y -f lavfi -i anullsrc=r=48000:cl=stereo -t ${TOTAL} music.wav\n  fi\nfi\n\n# 3) Stitch with cross-dissolves and export (H.264 High, 1080x1920, 30fps, AAC)\nffmpeg -hide_banner -loglevel error -y ${inputs} ${ambInputs} -i music.wav -filter_complex \"${fc}\" -map \"[vout]\" -map \"[aout]\" -c:v libx264 -preset slow -crf 18 -profile:v high -pix_fmt yuv420p -r ${FPS} -g ${FPS * 2} -c:a aac -b:a 192k -ar 48000 -movflags +faststart -t ${TOTAL} final.mp4\n[ -s final.mp4 ]\necho \"MUSIC=\\${MUSIC:-none} SOUNDS_GENERATED=${genOk}/${gen.length}\"\necho \"$DIR/final.mp4\"\n`;\n\nconst slug = clean(d.title || 'short').toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60) || 'short';\nreturn [{ json: {\n  ...d,\n  job: job,\n  job_dir: dir,\n  sound: gen.map(g => g.error ? `failed: ${String(g.error.message || g.error).slice(0, 120)}` : `${g.path} (${g.took}s)`),\n  output_path: `${dir}/final.mp4`,\n  file_name: `${slug}-${job}.mp4`,\n  duration: TOTAL,\n  command: `mkdir -p '${dir}' && echo '${b64(script)}' | base64 -d > '${dir}/render.sh' && sh '${dir}/render.sh'`\n}}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -387,7 +436,7 @@
         11232,
         2704
       ],
-      "id": "a014235d-f621-4b85-b7a2-2760996c0163",
+      "id": "80c734f4-6ec9-4950-be6b-a65507655a9c",
       "name": "Build Render Script"
     },
     {
@@ -400,7 +449,7 @@
         11392,
         2704
       ],
-      "id": "552312bd-0552-4d0c-a40a-4a62713aa35d",
+      "id": "3b48870d-8354-40c7-be75-71c5b176c23a",
       "name": "Render with FFmpeg"
     },
     {
@@ -417,71 +466,38 @@
         11552,
         2704
       ],
-      "id": "882d8302-c87c-49a3-bf15-d213de00e82c",
+      "id": "7de97be8-df0e-45d0-9730-ea9f7393855d",
       "name": "Read Final Video"
     },
     {
       "parameters": {
-        "name": "={{ $('Build Render Script').first().json.file_name }}",
-        "driveId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "My Drive"
+        "method": "POST",
+        "url": "={{ $('Settings').first().json.postiz_url }}/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
         },
-        "folderId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "root",
-          "cachedResultName": "/ (Root folder)"
-        },
-        "options": {}
+        "options": {
+          "timeout": 600000
+        }
       },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         10912,
         2992
       ],
-      "id": "08534722-aaa8-441f-9d73-b51d9861b1b1",
-      "name": "Upload to Drive"
-    },
-    {
-      "parameters": {
-        "operation": "share",
-        "fileId": {
-          "__rl": true,
-          "value": "={{ $json.id }}",
-          "mode": "id"
-        },
-        "permissionsUi": {
-          "permissionsValues": {
-            "role": "reader",
-            "type": "anyone"
-          }
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        11072,
-        2992
-      ],
-      "id": "a47990a1-d0eb-4b5f-a2a8-ffc349d1aaf5",
-      "name": "Make Public"
-    },
-    {
-      "parameters": {
-        "jsCode": "const id = $('Upload to Drive').first().json.id;\nif (!id) throw new Error('Google Drive upload returned no file id');\nconst meta = $('Build Render Script').first().json;\nreturn [{ json: {\n  row_number: meta.row_number,\n  title: meta.title,\n  caption: meta.caption,\n  credits: meta.credits,\n  file_id: id,\n  url: `https://drive.google.com/uc?export=download&id=${id}`,\n  view_url: `https://drive.google.com/file/d/${id}/view`\n}}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        11232,
-        2992
-      ],
-      "id": "af9b27df-48a0-424c-9010-354f53329f68",
-      "name": "Public Video URL"
+      "id": "5ce2b9be-9cbb-48f7-ad5d-a32a2a5eeeea",
+      "name": "Upload to Postiz"
     },
     {
       "parameters": {
@@ -490,98 +506,61 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        11392,
-        2992
+        10912,
+        3152
       ],
-      "id": "9ece4276-dee8-4228-a641-7bebdae80d88",
+      "id": "16b68df3-18ee-4295-9c26-b85b33ca66db",
       "name": "Cleanup Temp Files",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://backend.blotato.com/v2/media",
+        "url": "={{ $('Settings').first().json.postiz_url }}/integrations",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "url",
-              "value": "={{ $json.url }}"
-            }
-          ]
-        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        12400,
-        2576
+        11072,
+        2992
       ],
-      "id": "3cda6eeb-b41f-42d2-a6c4-6529400718b2",
-      "name": "Upload to Blotato"
+      "id": "92bfbc3b-d63e-49e0-8527-d8cfaaca086a",
+      "name": "List Postiz Channels"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build ONE Postiz post that publishes the video to Instagram Reels, TikTok and YouTube Shorts.\nconst cfg = $('Settings').first().json;\nconst media = $('Upload to Postiz').first().json;      // { id, name, path, ... }\nconst meta = $('Build Render Script').first().json;     // title, caption...\nif (!media.id || !media.path) throw new Error('Postiz upload returned no media: ' + JSON.stringify(media).slice(0, 300));\n\n// The channel list may arrive as one array item or as one item per channel.\nlet channels = $input.all().map(i => i.json);\nif (channels.length === 1 && Array.isArray(channels[0].data)) channels = channels[0].data;\nchannels = channels.filter(c => c && c.id && !c.disabled);\n\n// Postiz stores post text as HTML: one <p> per line keeps the line breaks.\nconst esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst html = String(meta.caption || '').split('\\n').map(l => `<p>${esc(l)}</p>`).join('');\nconst value = [{ content: html, image: [{ id: media.id, path: media.path }] }];\n\nconst pick = (identifiers, wanted) => channels.filter(c => identifiers.includes(c.identifier) && (!wanted.length || wanted.includes(c.id)));\nconst title = String(meta.title || meta.topic || 'Short').slice(0, 100);\n\nconst posts = [\n  ...pick(['instagram', 'instagram-standalone'], cfg.instagram_ids).map(c => ({\n    integration: { id: c.id }, value,\n    settings: { __type: c.identifier, post_type: 'post', collaborators: [] }\n  })),\n  ...pick(['tiktok'], cfg.tiktok_ids).map(c => ({\n    integration: { id: c.id }, value,\n    settings: {\n      __type: 'tiktok', title: title.slice(0, 90), privacy_level: 'PUBLIC_TO_EVERYONE',\n      duet: true, stitch: true, comment: true, autoAddMusic: 'no',\n      brand_content_toggle: false, brand_organic_toggle: false,\n      video_made_with_ai: !!cfg.tiktok_ai_label, content_posting_method: 'DIRECT_POST'\n    }\n  })),\n  ...pick(['youtube'], cfg.youtube_ids).map(c => ({\n    integration: { id: c.id }, value,\n    settings: { __type: 'youtube', title: title.length >= 2 ? title : title + ' ', type: cfg.youtube_privacy || 'public', selfDeclaredMadeForKids: 'no' }\n  }))\n];\nif (!posts.length) throw new Error('No matching Postiz channels. Connected: ' + channels.map(c => `${c.name} (${c.identifier}, ${c.id})`).join(', '));\n\nreturn [{ json: {\n  body: { type: cfg.post_mode || 'now', date: new Date().toISOString(), shortLink: false, tags: [], posts },\n  channels: posts.map(p => `${p.settings.__type}:${p.integration.id}`).join(', '),\n  video_url: media.path\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11232,
+        2992
+      ],
+      "id": "51e4c36d-616f-48cb-9b6d-8da9f00f4394",
+      "name": "Build Postiz Post"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://backend.blotato.com/v2/posts",
+        "url": "={{ $('Settings').first().json.postiz_url }}/posts",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"instagram\" }, content: { text: $('Public Video URL').first().json.caption, platform: \"instagram\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        12608,
-        2192
+        11392,
+        2992
       ],
-      "id": "9b0eb190-75e4-4a09-9549-df42b8f0d532",
-      "name": "Instagram"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://backend.blotato.com/v2/posts",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"tiktok\", isYourBrand: false, disabledDuet: false, privacyLevel: \"PUBLIC_TO_EVERYONE\", isAiGenerated: false, disabledStitch: false, disabledComments: false, isBrandedContent: false }, content: { text: $('Public Video URL').first().json.caption, platform: \"tiktok\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        12608,
-        2432
-      ],
-      "id": "70e242b6-0f6c-4f0f-ade9-df3a4e4dd989",
-      "name": "TikTok"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://backend.blotato.com/v2/posts",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ post: { target: { targetType: \"youtube\", title: $('Public Video URL').first().json.title, privacyStatus: \"public\", shouldNotifySubscribers: true }, content: { text: $('Public Video URL').first().json.caption, platform: \"youtube\", mediaUrls: [$json.url] }, accountId: \"ACCOUNT_ID\" } }) }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        12608,
-        2672
-      ],
-      "id": "d42795e4-ceff-43a6-b9c3-4ed3f65b50e3",
-      "name": "YouTube"
+      "id": "914ba23e-9c41-4492-9de0-2a2fabe02340",
+      "name": "Publish to Postiz"
     },
     {
       "parameters": {
@@ -603,9 +582,9 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "row_number": "={{ $('Public Video URL').first().json.row_number }}",
-            "Status": "Posted",
-            "Video URL": "={{ $('Public Video URL').first().json.view_url }}"
+            "row_number": "={{ $('Pick Next Row').first().json.row_number }}",
+            "Status": "={{ $('Settings').first().json.post_mode === 'draft' ? 'Draft in Postiz' : 'Posted' }}",
+            "Video URL": "={{ $('Build Postiz Post').first().json.video_url }}"
           },
           "matchingColumns": [
             "row_number"
@@ -693,10 +672,10 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        12608,
-        2912
+        11552,
+        2992
       ],
-      "id": "2df92e57-d92e-499d-9c42-ce7120ebe80e",
+      "id": "4728653a-f6a5-4eac-bdef-aa6f4a70bcb2",
       "name": "Update Sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -709,6 +688,17 @@
   "pinData": {},
   "connections": {
     "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
       "main": [
         [
           {
@@ -767,28 +757,6 @@
       "main": [
         [
           {
-            "node": "Search Pexels",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search Pexels": {
-      "main": [
-        [
-          {
-            "node": "Search Pexels (alt)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search Pexels (alt)": {
-      "main": [
-        [
-          {
             "node": "Search Pixabay",
             "type": "main",
             "index": 0
@@ -797,6 +765,39 @@
       ]
     },
     "Search Pixabay": {
+      "main": [
+        [
+          {
+            "node": "Search Pixabay (alt)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pixabay (alt)": {
+      "main": [
+        [
+          {
+            "node": "Search Pixabay (generic)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pixabay (generic)": {
+      "main": [
+        [
+          {
+            "node": "Search Pexels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pexels": {
       "main": [
         [
           {
@@ -866,40 +867,18 @@
       "main": [
         [
           {
-            "node": "Upload to Drive",
+            "node": "Upload to Postiz",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Upload to Drive": {
+    "Upload to Postiz": {
       "main": [
         [
           {
-            "node": "Make Public",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Make Public": {
-      "main": [
-        [
-          {
-            "node": "Public Video URL",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Public Video URL": {
-      "main": [
-        [
-          {
-            "node": "Upload to Blotato",
+            "node": "List Postiz Channels",
             "type": "main",
             "index": 0
           },
@@ -911,24 +890,31 @@
         ]
       ]
     },
-    "Upload to Blotato": {
+    "List Postiz Channels": {
       "main": [
         [
           {
-            "node": "Instagram",
+            "node": "Build Postiz Post",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Build Postiz Post": {
+      "main": [
+        [
           {
-            "node": "TikTok",
+            "node": "Publish to Postiz",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "YouTube",
-            "type": "main",
-            "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Publish to Postiz": {
+      "main": [
+        [
           {
             "node": "Update Sheet",
             "type": "main",

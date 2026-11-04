@@ -1,14 +1,14 @@
-# WF6 FREE: Nature & Destination Shorts (Pexels + AI Sound + FFmpeg)
+# WF6 FREE: Nature & Destination Shorts (Pixabay + AI Sound + FFmpeg + Postiz)
 
 This is a free version of the KIE.ai Veo/Nano Banana workflow. It makes the same 4-destination vertical short with no image or video generation credits:
 
 | Step | Before (paid) | Now (free) |
 |---|---|---|
 | Keyframes | Nano Banana Pro (KIE) | removed: no images needed |
-| Clips | Veo 3.1 Quality (KIE): the expensive part | **Pexels Video API**, with **Pixabay** as fallback. Real 1080p–4K stock footage, royalty-free, OK for monetized channels |
+| Clips | Veo 3.1 Quality (KIE): the expensive part | **Pixabay API** (free): 3 searches per scene, from place-specific to generic. Real 1080p–4K stock footage, royalty-free, OK for monetized channels. Pexels is included as an optional node, disabled while its API is paused |
 | Stitch/edit | Creatomate (paid) | **FFmpeg** inside n8n |
 | Sound | Veo native audio | **Generated from prompts, free**: local **Stable Audio Open** (`audiogen` container). Claude writes a sound prompt per scene and one score prompt; the AI generates them |
-| Hosting | Creatomate URL | **Google Drive** public link |
+| Publishing | Blotato | **Postiz** public API: the MP4 is uploaded directly to Postiz and posted to Instagram Reels, TikTok and YouTube Shorts in one request (no Drive or hosting needed) |
 | Script | Claude via KIE | Claude via KIE (one cheap text call per video) |
 
 ## What the edit does (`Build Render Script`)
@@ -35,13 +35,16 @@ You can change the length, transition, fonts and paths at the top of the **Build
    - **CPU (default):** `stable-audio-open-small` makes each sound in roughly 10–40 s, so about 1–3 minutes of sound per video. It needs about 4 GB of RAM.
    - **NVIDIA GPU:** set `AUDIO_MODEL=stabilityai/stable-audio-open-1.0` for richer music (up to 47 s, no looping) and set `MUSIC_SECONDS = 30` in *Plan Audio*. Build with the CUDA torch index, as noted in docker-compose.yml.
 3. **Import** `WF6-free-nature-shorts.json` into n8n.
-4. **Pexels** (free key from pexels.com/api): create a Header Auth credential with Name `Authorization` and Value `YOUR_KEY` (no "Bearer"). Select it on *Search Pexels* and *Search Pexels (alt)*.
-5. **Pixabay** (free key from pixabay.com/api/docs): create a Query Auth credential with Name `key` and Value `YOUR_KEY`. Select it on *Search Pixabay*.
+4. **Pixabay** (free key from pixabay.com/api/docs): create a Query Auth credential with Name `key` and Value `YOUR_KEY`. Select it on all 3 *Search Pixabay* nodes.
+5. **Postiz:** copy your API key from Postiz → Settings → Public API. Create a Header Auth credential with Name `Authorization` and Value `YOUR_KEY` (no "Bearer"). Select it on *Upload to Postiz*, *List Postiz Channels* and *Publish to Postiz*. Then open the **Settings** node (the first node) and set:
+   - `POSTIZ_URL`: `https://api.postiz.com/public/v1` for Postiz cloud, or `https://YOUR-DOMAIN/api/public/v1` if you self-host Postiz.
+   - `INSTAGRAM_IDS`, `TIKTOK_IDS`, `YOUTUBE_IDS`: leave them empty to post to every connected channel of that platform, or paste specific channel IDs. Running *List Postiz Channels* once shows them.
+   - `POST_MODE`: `'draft'` lets you review each video in Postiz before it goes out.
 6. **Music fallback (optional):** `.mp3` files in `n8n/music/<mood>/`. They are only used when `GENERATE_MUSIC = false` in *Plan Audio*, or when music generation fails.
-7. **Google Drive:** add an OAuth2 credential on *Upload to Drive* and *Make Public*.
-8. **Claude (KIE)**, **Google Sheets** and **Blotato** are set up the same way as before. Put your Blotato account IDs in the Instagram, TikTok and YouTube nodes.
+7. **Claude (KIE)** and **Google Sheets** are set up the same way as before. The sheet's *Video URL* column gets the Postiz media link.
+8. **Pexels (optional, later):** when the Pexels API is back, add a Header Auth credential (`Authorization` = key) on *Search Pexels* and enable that node. Its clips are then mixed into the choice automatically.
 
-Free limits: Pexels allows 200 requests/hour and 20,000/month. Each video uses 8 requests.
+Free limits: Pixabay allows 100 requests per minute. Each video uses 12. TikTok posts are labelled as AI-made (`TIKTOK_AI_LABEL` in *Settings*) because the sound is generated.
 
 ## Tuning the sound
 - **Plan Audio** node: `GENERATE_MUSIC` and `MUSIC_SECONDS`. It also adds "natural field recording, no music" to each ambience prompt.
